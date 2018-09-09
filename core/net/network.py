@@ -1,7 +1,7 @@
 import types
 import re
 
-from network_manager import NetworkManager
+from .network_manager import NetworkManager
 from core.enums import numericEnum
 
 

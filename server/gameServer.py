@@ -8,7 +8,7 @@ import random
 import time
 import inspect
 
-from network_manager import ConnectionClosed
+from core.net.network_manager import ConnectionClosed
 from core.game import Game, EndOfGame
 from core.exceptions import IllegalMoveError
 from core.enums import numericEnum, Zone
