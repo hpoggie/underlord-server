@@ -11,7 +11,7 @@ import inspect
 from core.net.network_manager import ConnectionClosed
 from core.game import Game, EndOfGame
 from core.exceptions import IllegalMoveError
-from core.enums import numericEnum, Zone
+from core.enums import numericEnum
 from factions.templars import Templar
 from factions.mariners import Mariner
 from factions.thieves import Thief
@@ -20,6 +20,9 @@ from factions.fae import Faerie
 
 class ServerError(BaseException):
     pass
+
+
+Zone = numericEnum('face', 'faceup', 'facedown', 'hand', 'graveyard')
 
 
 availableFactions = [Templar, Mariner, Thief, Faerie]
