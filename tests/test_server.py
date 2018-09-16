@@ -1,9 +1,14 @@
 import types
 
-import network
+import core.net.network as network
 from lobbyServer import LobbyServer
 from gameServer import GameServer
-from client.networkInstructions import NetworkInstructions
+
+
+class NetworkInstructions:
+    def __init__(self):
+        for key in network.ClientNetworkManager.Opcodes.keys:
+            setattr(self, key, lambda: None)
 
 
 lobbyServer = LobbyServer("-v")
