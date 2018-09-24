@@ -16,13 +16,11 @@ from ul_core.factions.templars import Templar
 from ul_core.factions.mariners import Mariner
 from ul_core.factions.thieves import Thief
 from ul_core.factions.fae import Faerie
+from ul_core.net.enums import Zone
 
 
 class ServerError(BaseException):
     pass
-
-
-Zone = numericEnum('face', 'faceup', 'facedown', 'hand', 'graveyard')
 
 
 availableFactions = [Templar, Mariner, Thief, Faerie]
