@@ -1,6 +1,6 @@
 import types
 
-import core.net.network as network
+import ul_core.net.network as network
 from lobbyServer import LobbyServer
 from gameServer import GameServer
 

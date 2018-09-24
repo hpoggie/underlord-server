@@ -8,10 +8,10 @@ import sys
 import copy
 import random
 import time
-import core.net.network as network
+import ul_core.net.network as network
 
-from core.net.network_manager import ConnectionClosed
-from core.net.network import ServerNetworkManager
+from ul_core.net.network_manager import ConnectionClosed
+from ul_core.net.network import ServerNetworkManager
 from gameServer import GameServer
 
 

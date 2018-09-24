@@ -8,14 +8,14 @@ import random
 import time
 import inspect
 
-from core.net.network_manager import ConnectionClosed
-from core.game import Game, EndOfGame
-from core.exceptions import IllegalMoveError
-from core.enums import numericEnum
-from core.factions.templars import Templar
-from core.factions.mariners import Mariner
-from core.factions.thieves import Thief
-from core.factions.fae import Faerie
+from ul_core.net.network_manager import ConnectionClosed
+from ul_core.core.game import Game, EndOfGame
+from ul_core.core.exceptions import IllegalMoveError
+from ul_core.core.enums import numericEnum
+from ul_core.factions.templars import Templar
+from ul_core.factions.mariners import Mariner
+from ul_core.factions.thieves import Thief
+from ul_core.factions.fae import Faerie
 
 
 class ServerError(BaseException):
