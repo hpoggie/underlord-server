@@ -212,7 +212,6 @@ class GameServer:
             if enemy:
                 target = pl.opponent.zones[zone][index]
             else:
-                print((zone, index, enemy))
                 target = pl.zones[zone][index]
             lst.append(target)
 
