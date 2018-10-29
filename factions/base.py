@@ -1,8 +1,8 @@
-from core.game import destroy
-import core.card
+from ul_core.core.game import destroy
+import ul_core.core.card as card
 
 
-class Card(core.card.Card):
+class Card(card.Card):
     """
     Override the image path to use base_icons
     """
@@ -38,7 +38,7 @@ class spellBlade(Card):
     rank = "s"
     spell = True
     fast = True
-    desc = "Destroy target face-down card."
+    desc = "Fast. Destroy target face-down card."
 
     def onSpawn(self, target):
         if target.facedown:
