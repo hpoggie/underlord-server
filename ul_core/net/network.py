@@ -1,23 +1,13 @@
 import types
-import re
 
 from .network_manager import NetworkManager
 from ul_core.core.enums import numericEnum
+from ul_core.net.serialization import (serialize, deserialize,
+                                       DeserializationError)
 
 
 class OpcodeError(Exception):
     pass
-
-
-def serialize(args):
-    return ''.join([{int: 'i', float: 'f', bool: 'b'}[type(x)] +
-                    (repr(int(x)) if isinstance(x, bool) else repr(x))
-                    for x in args])
-
-
-def deserialize(packet):
-    return [{'i': int, 'f': float, 'b': bool}[s[0]](int(s[1:]))
-            for s in re.findall('[a-z][^a-z]*', packet)]
 
 
 class ULNetworkManager(NetworkManager):
@@ -60,7 +50,7 @@ class ServerNetworkManager (ULNetworkManager):
 
         try:
             operands = deserialize(packet)
-        except KeyError:
+        except DeserializationError:
             print("Got malformed packet: " + packet)
             return
 
@@ -153,7 +143,7 @@ class ClientNetworkManager (ULNetworkManager):
 
         try:
             operands = deserialize(packet)
-        except KeyError:
+        except DeserializationError:
             print("Got malformed packet: " + packet)
             return
 
