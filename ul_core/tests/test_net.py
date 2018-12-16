@@ -50,6 +50,10 @@ def client():
     return cl
 
 
+def test_fake_server():
+    FakeServer()
+
+
 def test_sanity_check(server, client):
     stime = time.time()
     while time.time() < stime + 1 and len(client.recvdPackets) == 0:
@@ -63,15 +67,15 @@ def test_bad_packets():
             network.ClientNetworkManager(None, 'localhost', 9099))
 
     for nm in nms:
-        nm.onGotPacket('00000', ('localhost', 9099))
-        nm.onGotPacket('i@3#b1', ('localhost', 9099))
-        nm.onGotPacket('i' + '8' * 50000, ('localhost', 9099))
-        nm.onGotPacket('i8' * 50000, ('localhost', 9099))
+        nm.onGotPacket(b'00000', ('localhost', 9099))
+        nm.onGotPacket(b'i@3#b1', ('localhost', 9099))
+        nm.onGotPacket(b'i' + b'8' * 50000, ('localhost', 9099))
+        nm.onGotPacket(b'i8' * 50000, ('localhost', 9099))
 
 
 def test_long_packet(server, client):
     addr = ('localhost', 9099)
-    client.networkManager.send(addr, 'a' * (client.networkManager.maxBufferLength + 5))
+    client.networkManager.send(addr, b'a' * (client.networkManager.maxBufferLength + 5))
 
     stime = time.time()
     while time.time() < stime + 1:
