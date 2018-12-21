@@ -5,6 +5,8 @@ from ul_core.core.card import Card
 from ul_core.core.game import destroy
 import ul_core.factions.base as base
 
+iconPath = "fae_icons"
+
 
 class faerieMoth(Card):
     name = "Faerie Moth"
@@ -153,9 +155,13 @@ class fireDust(Card):
             c2.rank -= 1
 
 
+allCards = [faerieMoth, oberonsGuard, titaniasGuard,
+        preciseDiscard, mesmerism, returnToSender,
+        enchantersTrap, radiance, fireDust]
+
+
 class Faerie(Player):
     name = "Fae"
-    iconPath = "fae_icons"
     cardBack = "fairy.png"
     deck = deck(
         faerieMoth, 5,

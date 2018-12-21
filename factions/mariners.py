@@ -7,6 +7,8 @@ from ul_core.core.faction import deck
 from ul_core.core.player import Player
 from ul_core.core.exceptions import IllegalMoveError, InvalidTargetError
 
+iconPath = "mariner_icons"
+
 
 def flood(game):
     if hasattr(game, 'flooded'):
@@ -165,8 +167,12 @@ class humboldtSquid(AquaticCard):
         self.rank = 1
 
 
+allCards = [humboldtSquid, braintwister, nuisanceFlooding,
+              highTide, grandJelly, unexpectedShark, kraken,
+              voidstar, ripCurrent]
+
+
 class Mariner(Player):
-    iconPath = "mariner_icons"
     cardBack = "nautilus-shell.png"
     deck = deck(humboldtSquid, 5,
               braintwister, 4,

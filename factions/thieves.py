@@ -6,6 +6,8 @@ from ul_core.core.card import Card
 from ul_core.core.game import destroy, Phase
 from ul_core.core.faction import deck
 
+iconPath = "thief_icons"
+
 
 class MultiattackCard(Card):
     def __init__(self, **kwargs):
@@ -172,9 +174,13 @@ class heavyLightning(Card):
         self.controller.drawCards(3)
 
 
+allCards = [fog, spectralCrab, spellHound, doubleDragon,
+        headLightning, roseEmblem, daggerEmblem, hydra,
+        timeBeing, heavyLightning, spellScalpel]
+
+
 class Thief(Player):
     name = "Thieves"
-    iconPath = "thief_icons"
     cardBack = "dagger-rose.png"
     deck = deck(
         base.elephant,

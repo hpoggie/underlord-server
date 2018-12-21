@@ -1,24 +1,17 @@
 from ul_core.core.game import destroy
 import ul_core.core.card as card
 
-
-class Card(card.Card):
-    """
-    Override the image path to use base_icons
-    """
-    @property
-    def imagePath(self):
-        return 'base_icons/' + self.image
+iconPath = 'base_icons/'
 
 
-class elephant(Card):
+class elephant(card.Card):
     name = "Elephant"
     image = "elephant.png"
     cost = 5
     rank = 5
 
 
-class sweep(Card):
+class sweep(card.Card):
     name = "Sweep"
     image = "wind-slap.png"
     cost = 4
@@ -31,7 +24,7 @@ class sweep(Card):
             player.faceups.destroyAllUnits()
 
 
-class spellBlade(Card):
+class spellBlade(card.Card):
     name = "Spell Blade"
     image = "wave-strike.png"
     cost = 3
@@ -45,7 +38,7 @@ class spellBlade(Card):
             destroy(target)
 
 
-class mindControlTrap(Card):
+class mindControlTrap(card.Card):
     name = "Mind Control Trap"
     image = "magic-swirl.png"
     cost = 2
@@ -62,4 +55,5 @@ class mindControlTrap(Card):
         enemy.zone = self.controller.faceups
 
 
+allCards = [elephant, sweep, spellBlade, mindControlTrap]
 deck = [sweep(), spellBlade(), mindControlTrap()]
