@@ -12,18 +12,12 @@ from ul_core.net.network_manager import ConnectionClosed
 from ul_core.core.game import Game, EndOfGame
 from ul_core.core.exceptions import IllegalMoveError
 from ul_core.core.enums import numericEnum
-from ul_core.factions.templars import Templar
-from ul_core.factions.mariners import Mariner
-from ul_core.factions.thieves import Thief
-from ul_core.factions.fae import Faerie
 from ul_core.net.enums import Zone
+import ul_core.factions
 
 
 class ServerError(BaseException):
     pass
-
-
-availableFactions = [Templar, Mariner, Thief, Faerie]
 
 
 def getCard(player, card):
@@ -98,6 +92,7 @@ class GameServer:
     # actions
 
     def selectFaction(self, addr, index):
+        availableFactions = ul_core.factions.availableFactions
         self.factions[self.addrs.index(addr)] = availableFactions[index]
         # If both players have selected their faction, start the game
         started = hasattr(self, 'game')
