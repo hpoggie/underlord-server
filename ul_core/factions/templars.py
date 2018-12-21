@@ -4,6 +4,8 @@ from ul_core.core.card import Card
 from ul_core.core.faction import deck
 from ul_core.core.player import Player
 
+iconPath = "templar_icons"
+
 
 class equus(Card):
     name = "Equus"
@@ -172,9 +174,13 @@ class crystalRain(Card):
             player.faceups.destroyAllUnits()
 
 
+allCards = [corvus, leftGrail, rightGrail, equus, guardianAngel,
+            holyHandGrenade, wrathOfGod, archangel, miracle,
+            crystalLance, crystalRain, crystalElemental, invest]
+
+
 class Templar(Player):
     name = "Templars"
-    iconPath = "templar_icons"
     cardBack = "templar-shield.png"
     deck = deck(
             corvus, 5,
