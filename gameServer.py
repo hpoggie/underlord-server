@@ -213,11 +213,11 @@ class GameServer:
         pl.replace(*lst)
         self.redraw()
 
-    def useThiefAbility(self, addr, discardIndex, guessId, targetIndex):
+    def useThiefAbility(self, addr, discardIndex, cardname, targetIndex):
         pl = self.players[addr]
         pl.thiefAbility(
             pl.hand[discardIndex],
-            pl.opponent.__class__.deck[guessId].name,
+            cardname,
             pl.opponent.facedowns[targetIndex])
         self.redraw()
 
