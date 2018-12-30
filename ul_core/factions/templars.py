@@ -10,9 +10,8 @@ iconPath = "templar_icons"
 class equus(Card):
     name = "Equus"
     image = "horse-head.png"
-    cost = 3
-    desc = ("Has rank 2 if your mana cap is even and rank 5 if your mana cap "
-            "is odd.")
+    cost = 4
+    desc = "Rank: 5 if your mana cap is odd, 2 if it's even."
 
     @property
     def rank(self):
@@ -32,7 +31,7 @@ class holyHandGrenade(Card):
     fast = True
     cost = 4
     rank = 's'
-    desc = "Destroy target card."
+    desc = "Fast. Destroy target card."
 
     def onSpawn(self, target):
         destroy(target)
@@ -44,7 +43,7 @@ class wrathOfGod(Card):
     cost = 5
     rank = 's'
     fast = True
-    desc = "Destroy all face-up units."
+    desc = "Fast. Destroy all face-up units."
 
     def onSpawn(self):
         for player in self.game.players:
@@ -55,11 +54,11 @@ class corvus(Card):
     name = "Corvus"
     image = "raven.png"
     cost = 1
-    rank = 1
-    desc = "When this spawns, add 1 to your mana cap."
+    desc = "Rank: 2 if your mana cap is odd, 3 if it's even."
 
-    def onSpawn(self):
-        self.controller.manaCap += 1
+    @property
+    def rank(self):
+        return 1 if (self.controller.manaCap % 2 == 0) else 2
 
 
 class miracle(Card):
@@ -78,7 +77,7 @@ class crystalElemental(Card):
     image = "crystal-cluster.png"
     cost = 7
     rank = 4
-    desc = "Whenever you destroy an enemy face-down card, draw a card."
+    desc = "Whenever an enemy face-down card is destroyed, draw a card."
 
     def beforeDestroy(self, card):
         if card.zone is self.controller.opponent.facedowns:
@@ -97,43 +96,22 @@ class invest(Card):
         self.controller.drawCard()
 
 
-class leftGrail(Card):
-    name = "Left Grail"
-    image = "holy-grail.png"
+class gargoyle(Card):
+    name = "Gargoyle"
+    image = "gargoyle.png"
     cost = 2
+    rank = 2
     taunt = True
-    desc = ("Taunt. Has rank 2 if your mana cap is even and rank 3 if your "
-            "mana cap is odd.")
-
-    @property
-    def rank(self):
-        return 2 if (self.controller.manaCap % 2 == 0) else 3
-
-
-class rightGrail(Card):
-    name = "Right Grail"
-    image = "holy-grail.png"
-    cost = 2
-    taunt = True
-    desc = ("Taunt. Has rank 3 if your mana cap is even and rank 2 if your "
-            "mana cap is odd.")
-
-    @property
-    def rank(self):
-        return 3 if (self.controller.manaCap % 2 == 0) else 2
+    desc = "Taunt."
 
 
 class guardianAngel(Card):
     name = "Guardian Angel"
     image = "winged-shield.png"
     cost = 4
+    rank = 4
     taunt = True
-    desc = ("Taunt. Has rank 5 if your mana cap is even and rank 3 if your "
-            "mana cap is odd.")
-
-    @property
-    def rank(self):
-        return 5 if (self.controller.manaCap % 2 == 0) else 3
+    desc = "Taunt."
 
 
 class crystalLance(Card):
@@ -158,9 +136,10 @@ class crystalLance(Card):
 class crystalRain(Card):
     name = "Crystal Rain"
     image = "crystal-bars.png"
-    cost = 5
+    cost = 4
     rank = 's'
-    desc = ("Destroy target face-down card. "
+    fast = True
+    desc = ("Fast. Destroy target face-down card. "
             "If this is attacked while face-down, "
             "destroy all face-up units.")
     targetDesc = "Destroy target face-down card."
@@ -174,19 +153,18 @@ class crystalRain(Card):
             player.faceups.destroyAllUnits()
 
 
-allCards = [corvus, leftGrail, rightGrail, equus, guardianAngel,
-            holyHandGrenade, wrathOfGod, archangel, miracle,
-            crystalLance, crystalRain, crystalElemental, invest]
+allCards = [corvus, gargoyle, equus, guardianAngel, holyHandGrenade,
+            wrathOfGod, archangel, miracle, crystalLance, crystalRain,
+            crystalElemental, invest]
 
 
 class Templar(Player):
     name = "Templars"
     iconPath = iconPath
-    cardBack = "templar-shield.png"
+    cardBack = "egyptian-temple.png"
     deck = deck(
             corvus, 5,
-            leftGrail, 2,
-            rightGrail, 2,
+            gargoyle, 4,
             equus, 3,
             guardianAngel, 2,
             base.elephant,

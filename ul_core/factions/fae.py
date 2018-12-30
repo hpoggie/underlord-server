@@ -37,33 +37,13 @@ class titaniasGuard(Card):
     image = 'batwing-emblem.png'
     cost = 4
     rank = 4
-    desc = "When this spawns, turn target face-up unit face-down."
+    desc = "On Spawn: You may turn target face-up unit face-down."
 
     def onSpawn(self, target):
-        if target is None or not target.faceup or target.spell:
+        if not target.faceup or target.spell:
             raise InvalidTargetError()
 
         target.zone = target.controller.facedowns
-
-
-class preciseDiscard(Card):
-    name = "Precise Discard"
-    image = 'card-pick.png'
-    cost = 2
-    rank = 'il'
-    desc = "Look at your opponent's hand and discard a card from it."
-
-    def onSpawn(self):
-        for c in self.controller.opponent.hand:
-            c.visible = True
-
-        def discard(card):
-            if card.zone is not self.controller.opponent.hand:
-                raise InvalidTargetError()
-
-            card.zone = card.owner.graveyard
-
-        self.controller.pushAction(discard)
 
 
 class faerieDragon(Card):
@@ -71,12 +51,12 @@ class faerieDragon(Card):
     image = 'chameleon-glyph.png'
     cost = 5
     rank = 4
-    desc = ("If this would be destroyed while face-up, return it to its "
-            "owner's hand instead.")
+    desc = ("If this would be destroyed while face-up, turn it face-down "
+            "instead.")
 
     def moveToZone(self, zone):
         if self.faceup and zone is self.owner.graveyard:
-            super().moveToZone(self.owner.hand)
+            super().moveToZone(self.controller.facedowns)
         else:
             super().moveToZone(zone)
 
@@ -84,25 +64,29 @@ class faerieDragon(Card):
 class mesmerism(Card):
     name = "Mesmerism"
     image = 'night-vision.png'
-    cost = 2
+    cost = 10
     rank = 'il'
-    desc = "Destroy all your opponent's face-up units."
+    desc = "Gain control of all your opponent's face-up units."
 
     def onSpawn(self):
-        self.controller.opponent.faceups.destroyAllUnits()
+        for c in self.controller.opponent.faceups[:]:
+            c.zone = self.controller.faceups
 
 
 class returnToSender(Card):
     name = "Return to Sender"
     image = 'return-arrow.png'
-    cost = 3
+    cost = 9
     rank = 'il'
-    desc = "Return all face-down cards to their owners' hands."
+    desc = ("Return all enemy face-up units and face-down cards to their "
+            "owners' hands.")
 
     def onSpawn(self):
-        for pl in self.game.players:
-            for fd in pl.facedowns[:]:
-                fd.zone = fd.owner.hand
+        for fd in self.controller.opponent.facedowns[:]:
+            fd.zone = fd.owner.hand
+
+        for c in self.controller.opponent.faceups[:]:
+            c.zone = c.owner.hand
 
 
 class enchantersTrap(Card):
@@ -123,41 +107,53 @@ class enchantersTrap(Card):
 class radiance(Card):
     name = "Radiance"
     image = 'sun.png'
-    cost = 4
+    cost = 8
     rank = 'il'
-    continuous = True
-    desc = ("Until end of turn, for every 1 damage you deal to your opponent,"
-            "they must discard a random card.")
+    desc = "Turn all your face-down cards face-up."
 
-    def afterDealDamage(self, player, amount):
-        if player is self.controller.opponent:
-            for i in range(amount):
-                player.discardRandom()
+    def onSpawn(self):
+        player = self.controller
 
-    def beforeEndTurn(self):
-        destroy(self)
+        def nextCard():
+            try:
+                c = player.facedowns[0]
+            except IndexError:
+                pass
+            else:
+                self.controller.pushAction(nextCard)
+                c.pushSpawn()
+
+        self.controller.pushAction(nextCard)
 
 
-class fireDust(Card):
-    name = "Fire Dust"
-    image = 'hot-spices.png'
+class wildMagic(Card):
+    name = "Wild Magic"
+    image = 'spiky-explosion.png'
+    cost = 5
+    rank = 'il'
+    desc = "Discard your hand. Draw three cards."
+
+    def onSpawn(self):
+        self.controller.hand.destroyAll()
+        self.controller.drawCards(3)
+
+
+class gatewayToFaerie(Card):
+    name = "Gateway to Faerie"
+    image = 'magic-portal.png'
     cost = 3
     rank = 'il'
-    continuous = True
-    desc = "Your units have +1 rank while attacking."
+    desc = "Turn target face-down card face-up."
 
-    def beforeAnyFight(self, c1, c2):
-        if c2.controller is self.controller:
-            c2.rank += 1
+    def onSpawn(self, target):
+        if not target.facedown:
+            raise InvalidTargetError()
 
-    def afterAnyFight(self, c1, c2):
-        if c2.controller is self.controller:
-            c2.rank -= 1
+        target.pushSpawn()
 
 
-allCards = [faerieMoth, oberonsGuard, titaniasGuard,
-        preciseDiscard, mesmerism, returnToSender,
-        enchantersTrap, radiance, fireDust]
+allCards = [faerieMoth, oberonsGuard, titaniasGuard, mesmerism, returnToSender,
+            enchantersTrap, radiance, wildMagic, gatewayToFaerie]
 
 
 class Faerie(Player):
@@ -166,14 +162,14 @@ class Faerie(Player):
     cardBack = "fairy.png"
     deck = deck(
         faerieMoth, 5,
-        oberonsGuard, 4,
+        oberonsGuard, 2,
         titaniasGuard, 2,
-        preciseDiscard, 2,
         mesmerism, 1,
         returnToSender, 1,
         enchantersTrap, 2,
         radiance, 2,
-        fireDust, 3) + base.deck
+        wildMagic, 2,
+        gatewayToFaerie, 3) + base.deck
 
     def endPhase(self, card=None):
         self.failIfInactive()

@@ -2,6 +2,7 @@ from core.card import Card
 from core.game import destroy
 from ul_core.core.exceptions import InvalidTargetError, IllegalMoveError
 import factions.fae as fae
+import factions.thieves as thieves  # For Head Lightning
 from .util import newGame
 from . import dummyCards
 
@@ -35,25 +36,13 @@ def test_illusions():
     assert di.zone == p1.graveyard
 
 
-def test_precise_discard():
-    game, p0, p1 = newGame()
-
-    pd = fae.preciseDiscard(owner=p0, game=game, zone=p0.facedowns)
-    one = dummyCards.one(owner=p1, game=game, zone=p1.hand)
-
-    p0.mana = 2
-    p0.revealFacedown(pd)
-    p0.replace(one)
-    assert one.zone is p1.graveyard
-
-
 def test_faerie_dragon():
     game, p0, p1 = newGame()
 
     fd = fae.faerieDragon(owner=p0, game=game, zone=p0.faceups)
     destroy(fd)
 
-    assert fd.zone is p0.hand
+    assert fd.zone is p0.facedowns
 
 
 def test_mesmerism():
@@ -64,10 +53,11 @@ def test_mesmerism():
     c3 = dummyCards.one(owner=p1, game=game, zone=p1.faceups)
 
     mes = fae.mesmerism(owner=p0, game=game, zone=p0.facedowns)
-    p0.mana = 2
+    p0.mana = 10
     p0.revealFacedown(mes)
 
     assert len(p1.faceups) == 0
+    assert len(p0.faceups) == 3
 
 
 def test_return_to_sender():
@@ -77,7 +67,7 @@ def test_return_to_sender():
         dummyCards.one(owner=p1, game=game, zone=p1.facedowns)
 
     rts = fae.returnToSender(owner=p0, game=game, zone=p0.facedowns)
-    p0.mana = 3
+    p0.mana = 9
     p0.revealFacedown(rts)
 
     assert len(p1.facedowns) == 0
@@ -96,33 +86,39 @@ def test_enchanters_trap():
 def test_radiance():
     game, p0, p1 = newGame()
 
+    left = dummyCards.one(owner=p0, game=game, zone=p0.facedowns)
     rad = fae.radiance(owner=p0, game=game, zone=p0.facedowns)
-    one = dummyCards.one(owner=p0, game=game, zone=p0.faceups)
-    dummyCards.one(owner=p1, game=game, zone=p1.hand)
-    dummyCards.one(owner=p1, game=game, zone=p1.hand)
-    assert len(p1.hand) == 2
-    p0.mana = 4
+    right = dummyCards.one(owner=p0, game=game, zone=p0.facedowns)
+    right2 = dummyCards.one(owner=p1, game=game, zone=p0.facedowns)
+
+    p0.mana = rad.cost
     p0.revealFacedown(rad)
-    p0.endPhase()
-    p0.attack(one, p1.face)
-    assert p1.manaCap == 2
-    assert len(p1.hand) == 1
+    assert p0.actionStack == []
+    assert left.zone == p0.faceups
+    assert right.zone == p0.faceups
+    assert right2.zone == p0.faceups
 
 
-def test_fire_dust():
+def test_radiance_head_lightning():
     game, p0, p1 = newGame()
 
-    one = dummyCards.one(owner=p0, game=game, zone=p0.faceups)
-    two = dummyCards.one(owner=p1, game=game, zone=p1.faceups)
-    two.rank = 2
-    fae.fireDust(owner=p0, game=game, zone=p0.faceups)
-    assert one.rank == 1
-    assert two.rank == 2
+    rad = fae.radiance(owner=p0, game=game, zone=p0.facedowns)
+    thieves.headLightning(owner=p0, game=game, zone=p0.facedowns)
 
-    p0.endPhase()
-    p0.attack(one, two)
-    assert one.zone is p0.graveyard
-    assert two.zone is p1.graveyard
+    p0.mana = rad.cost
+    p0.revealFacedown(rad)
+    assert p0.replaceCallback is not None
+
+
+def test_gateway():
+    game, p0, p1 = newGame()
+
+    gateway = fae.gatewayToFaerie(owner=p0, game=game, zone=p0.facedowns)
+    one = dummyCards.one(owner=p0, game=game, zone=p0.facedowns)
+
+    p0.mana = gateway.cost
+    p0.revealFacedown(gateway, one)
+    assert one.zone is p0.faceups
 
 
 def test_titanias_guard():
