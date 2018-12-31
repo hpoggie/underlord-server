@@ -204,7 +204,9 @@ class GameServer:
 
         lst = []
         for zone, index, enemy in zip(cards[::3], cards[1::3], cards[2::3]):
-            if enemy:
+            if zone == -1:
+                target = None
+            elif enemy:
                 target = pl.opponent.zones[zone][index]
             else:
                 target = pl.zones[zone][index]
