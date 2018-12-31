@@ -22,14 +22,14 @@ class oberonsGuard(Card):
     image = 'elf-helmet.png'
     cost = 2
     rank = 2
-    desc = ("When this spawns, you may return target face-down card you "
-            "control to its owner's hand.")
+    desc = ("On Spawn: you may turn target face-up card you "
+            "control face-down.")
 
     def onSpawn(self, target):
-        if target.zone is not self.controller.facedowns:
+        if target.zone is not self.controller.faceups:
             raise InvalidTargetError()
 
-        target.zone = target.owner.hand
+        target.zone = target.controller.facedowns
 
 
 class titaniasGuard(Card):
@@ -113,15 +113,17 @@ class radiance(Card):
 
     def onSpawn(self):
         player = self.controller
+        affectedCards = []  # Don't turn the same card face-up twice
 
         def nextCard():
             try:
-                c = player.facedowns[0]
-            except IndexError:
+                c = next(c for c in player.facedowns if c not in affectedCards)
+            except StopIteration:
                 pass
             else:
                 self.controller.pushAction(nextCard)
                 c.pushSpawn()
+                affectedCards.append(c)
 
         self.controller.pushAction(nextCard)
 
