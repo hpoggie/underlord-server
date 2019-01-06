@@ -9,5 +9,5 @@ deploy:
   provider: script
   script: bash docker_push
   on:
-    branch: travis
+    branch: master
   skip_cleanup: true
