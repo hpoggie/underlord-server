@@ -10,3 +10,4 @@ deploy:
   script: bash docker_push
   on:
     branch: travis
+  skip_cleanup: true
