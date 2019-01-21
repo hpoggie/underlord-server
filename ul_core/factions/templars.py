@@ -25,18 +25,6 @@ class archangel(Card):
     rank = 15
 
 
-class holyHandGrenade(Card):
-    name = "Holy Hand Grenade"
-    image = "holy-hand-grenade.png"
-    fast = True
-    cost = 4
-    rank = 's'
-    desc = "Fast. Destroy target card."
-
-    def onSpawn(self, target):
-        destroy(target)
-
-
 class wrathOfGod(Card):
     name = "Wrath of God"
     image = "wind-hole.png"
@@ -75,25 +63,13 @@ class miracle(Card):
 class crystalElemental(Card):
     name = "Crystal Elemental"
     image = "crystal-cluster.png"
-    cost = 7
-    rank = 4
+    cost = 5
+    rank = 3
     desc = "Whenever an enemy face-down card is destroyed, draw a card."
 
     def beforeDestroy(self, card):
         if card.zone is self.controller.opponent.facedowns:
             self.controller.drawCard()
-
-
-class invest(Card):
-    name = "Invest"
-    image = "profit.png"
-    cost = 1
-    rank = 's'
-    desc = "Add 1 to your mana cap. Draw a card."
-
-    def onSpawn(self):
-        self.controller.manaCap += 1
-        self.controller.drawCard()
 
 
 class gargoyle(Card):
@@ -109,7 +85,7 @@ class guardianAngel(Card):
     name = "Guardian Angel"
     image = "winged-shield.png"
     cost = 4
-    rank = 4
+    rank = 3
     taunt = True
     desc = "Taunt."
 
@@ -153,9 +129,8 @@ class crystalRain(Card):
             player.faceups.destroyAllUnits()
 
 
-allCards = [corvus, gargoyle, equus, guardianAngel, holyHandGrenade,
-            wrathOfGod, archangel, miracle, crystalLance, crystalRain,
-            crystalElemental, invest]
+allCards = [corvus, gargoyle, equus, guardianAngel, wrathOfGod, archangel,
+            miracle, crystalLance, crystalRain, crystalElemental]
 
 
 class Templar(Player):
@@ -168,14 +143,12 @@ class Templar(Player):
             equus, 3,
             guardianAngel, 2,
             base.elephant,
-            holyHandGrenade,
             wrathOfGod,
             archangel,
             miracle,
-            crystalLance,
-            crystalRain,
-            crystalElemental,
-            invest) + base.deck
+            crystalLance, 2,
+            crystalRain, 2,
+            crystalElemental) + base.deck
 
     def templarAbility(self, card):
         if card and card in self.hand:
