@@ -161,8 +161,7 @@ class dullahan(Card):
     cost = 3
     rank = 2
     desc = ("On Spawn: Name a card. Look at all your opponent's "
-            "face-down cards and turn all of them with the chosen name "
-            "face-up.")
+            "face-down cards and destroy all of them with the chosen name.")
 
     def onSpawn(self):
         def nameAndDestroy(name):
@@ -175,7 +174,7 @@ class dullahan(Card):
 
 
 allCards = [faerieMoth, oberonsGuard, titaniasGuard, mesmerism, returnToSender,
-            enchantersTrap, radiance, wildMagic, gatewayToFaerie]
+            enchantersTrap, radiance, wildMagic, gatewayToFaerie, dullahan]
 
 
 class Faerie(Player):
@@ -191,7 +190,8 @@ class Faerie(Player):
         enchantersTrap, 2,
         radiance, 2,
         wildMagic, 2,
-        gatewayToFaerie, 3) + base.deck
+        gatewayToFaerie, 3,
+        dullahan, 2) + base.deck
 
     def endPhase(self, card=None):
         self.failIfInactive()
