@@ -11,9 +11,18 @@ from random import randint
 from ul_core.core.game import Phase
 from ul_core.core.zone import Zone
 from ul_core.core.exceptions import IllegalMoveError
+from ul_core.core.card import Card
+from ul_core.core.action import Action
 
 startHandSize = 5
 maxManaCap = 15
+
+
+class ActionArgumentTypeError(IllegalMoveError):
+    """
+    Raised when the wrong argument type is passed to an action.
+    """
+    pass
 
 
 class Player:
@@ -147,21 +156,25 @@ class Player:
     def win(self):
         self.game.end(winner=self)
 
-    def replace(self, *cards):
+    def replace(self, *args):
         if self.replaceCallback is None:
             raise IllegalMoveError("No effect to replace for.")
         else:
-            self.replaceCallback(*cards)
+            for i, arg in enumerate(args):
+                if not isinstance(arg, self.replaceCallback.argTypes[i]):
+                    raise ActionArgumentTypeError("Wrong argument type for action.")
+
+            self.replaceCallback(*args)
             self.replaceCallback = None
             self.popAction()
 
-    def pushAction(self, func):
+    def pushAction(self, func, argTypes=None):
         """
         Push an action onto the stack
         This is useful for requiring things to happen after targetCallback
         is called
         """
-        self.actionStack.append(func)
+        self.actionStack.append(Action(func, argTypes))
 
     def popAction(self):
         """
@@ -171,14 +184,14 @@ class Player:
             return
 
         try:
-            func = self.actionStack.pop()
+            action = self.actionStack.pop()
         except IndexError:
             pass
         else:
-            if func.__code__.co_argcount > 0:
-                self.replaceCallback = func
+            if action.nArgs > 0:
+                self.replaceCallback = action
             else:
-                func()
+                action()
                 self.popAction()
 
     # Actions

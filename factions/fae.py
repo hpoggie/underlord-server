@@ -165,12 +165,9 @@ class dullahan(Card):
 
     def onSpawn(self):
         def nameAndDestroy(name):
-            if not isinstance(name, str):
-                raise InvalidTargetError("Card name must be a string.")
-
             self.controller.opponent.facedowns.destroyAll(lambda c: c.name == name)
 
-        self.controller.pushAction(nameAndDestroy)
+        self.controller.pushAction(nameAndDestroy, argTypes=(str,))
 
 
 allCards = [faerieMoth, oberonsGuard, titaniasGuard, mesmerism, returnToSender,
