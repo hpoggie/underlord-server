@@ -13,6 +13,7 @@ from ul_core.core.game import Game, EndOfGame
 from ul_core.core.exceptions import IllegalMoveError
 from ul_core.core.enums import numericEnum
 from ul_core.net.enums import Zone
+from ul_core.core.card import Card
 import ul_core.factions
 
 
