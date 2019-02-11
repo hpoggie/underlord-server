@@ -199,18 +199,23 @@ class GameServer:
         self.redraw()
 
     # TODO: massive kludge
-    def replace(self, addr, *cards):
+    def replace(self, addr, *args):
         pl = self.players[addr]
 
-        lst = []
-        for zone, index, enemy in zip(cards[::3], cards[1::3], cards[2::3]):
-            if zone == -1:
-                target = None
-            elif enemy:
-                target = pl.opponent.zones[zone][index]
-            else:
-                target = pl.zones[zone][index]
-            lst.append(target)
+        if isinstance(args[0], str):
+            # This is the callback for Dullahan
+            pl.replace(args[0])
+            self.redraw()
+        else:
+            lst = []
+            for zone, index, enemy in zip(cards[::3], cards[1::3], cards[2::3]):
+                if zone == -1:
+                    target = None
+                elif enemy:
+                    target = pl.opponent.zones[zone][index]
+                else:
+                    target = pl.zones[zone][index]
+                lst.append(target)
 
         pl.replace(*lst)
         self.redraw()
@@ -273,7 +278,9 @@ class GameServer:
             c.endRedraw()
 
             if pl.replaceCallback is not None:
-                c.requestReplace(pl.replaceCallback.__code__.co_argcount)
+                types = (Card, str)
+                flags = (types.index(t) for t in pl.replaceCallback.argTypes)
+                c.requestReplace(pl.replaceCallback.nArgs, *flags)
 
         for pl in self.game.players:
             for z in pl.zones:
