@@ -94,27 +94,27 @@ class Card:
 
     def cast(self, target=None):
         self.controller.mana -= self.cost
-        self.spawn(target)
-
-    def spawn(self, target=None, newController=None):
-        self.pushSpawn(newController=newController)
-        self.controller.popAction()
+        self.spawn()
         if self.requiresTarget:
             self.controller.replaceCallback(target)
             self.controller.replaceCallback = None
             self.controller.popAction()
 
-    def pushSpawn(self, newController=None):
+    def spawn(self, newController=None):
         if newController is None:
             newController = self.controller
 
         self.zone = newController.faceups
 
+        self.pushSpawnEffect()
+        self.controller.popAction()
+
+    def pushSpawnEffect(self):
         def cleanupSpell():
             self.zone = self.owner.graveyard
 
         if self.spell and not self.continuous:
-            newController.pushAction(cleanupSpell)
+            self.controller.pushAction(cleanupSpell)
 
         if self.requiresTarget:
             def doActionWithTarget(target):
@@ -123,9 +123,9 @@ class Card:
                         target.isValidTarget):
                     self.onSpawn(target)
 
-            newController.pushAction(doActionWithTarget)
+            self.controller.pushAction(doActionWithTarget)
         else:
-            newController.pushAction(lambda: self.onSpawn())
+            self.controller.pushAction(lambda: self.onSpawn())
 
     def attack(self, target):
         self.hasAttacked = True
@@ -133,7 +133,7 @@ class Card:
         if target is self.controller.opponent.face:
             self.attackFace()
         else:
-            self.game.fight(target, self)
+            self.game.fight(attacker=self, target=target)
 
     def attackFace(self):
         self.game.dealDamage(self.controller.opponent, self.rank)
@@ -151,6 +151,12 @@ class Card:
         pass
 
     def afterFight(self, target):
+        pass
+
+    def beforeAttack(self, target):
+        pass
+
+    def afterAttack(self, target):
         pass
 
     @property
