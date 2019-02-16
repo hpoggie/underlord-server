@@ -47,8 +47,8 @@ class LobbyServer:
             self.readyPlayers.append(conn)
 
     def acceptConnections(self):
-        self.networkManager.accept()
         try:
+            self.networkManager.accept()
             self.networkManager.recv()
         except network.OpcodeError as e:
             print(e)
