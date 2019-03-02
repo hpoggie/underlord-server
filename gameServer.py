@@ -199,7 +199,7 @@ class GameServer:
         self.redraw()
 
     # TODO: massive kludge
-    def replace(self, addr, *cards):
+    def makeDecision(self, addr, *cards):
         pl = self.players[addr]
 
         lst = []
@@ -212,7 +212,7 @@ class GameServer:
                 target = pl.zones[zone][index]
             lst.append(target)
 
-        pl.replace(*lst)
+        pl.makeRequiredDecision(*lst)
         self.redraw()
 
     def useThiefAbility(self, addr, discardIndex, cardname, targetIndex):
@@ -272,8 +272,12 @@ class GameServer:
 
             c.endRedraw()
 
-            if pl.replaceCallback is not None:
-                c.requestReplace(pl.replaceCallback.__code__.co_argcount)
+        if self.game.requiredDecision is not None:
+            effectOwner = self.game.requiredDecision.owner
+            c = self.connections[next(addr for addr, player
+                    in self.players.items() if player == effectOwner)]
+            c.requestDecision(
+                self.game.requiredDecision.func.__code__.co_argcount)
 
         for pl in self.game.players:
             for z in pl.zones:
