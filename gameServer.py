@@ -190,12 +190,12 @@ class GameServer:
         self.redraw()
 
     @acceptsTarget
-    def endPhase(self, addr, target=None):
+    def endTurn(self, addr, target=None):
         pl = self.players[addr]
-        if pl.endPhase.__code__.co_argcount > 1:
-            pl.endPhase(target)
+        if pl.endTurn.__code__.co_argcount > 1:
+            pl.endTurn(target)
         else:
-            pl.endPhase()
+            pl.endTurn()
         self.redraw()
 
     # TODO: massive kludge
@@ -229,7 +229,6 @@ class GameServer:
             enemyPlayer = pl.opponent
 
             c.setActive(int(pl.active))
-            c.updatePhase(self.game.phase)
 
             if pl.faceups.dirty:
                 c.updatePlayerFaceups(*getZone(pl, pl.faceups))
