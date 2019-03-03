@@ -196,7 +196,7 @@ class GameServer:
     @acceptsTarget
     def endTurn(self, addr, target=None):
         pl = self.players[addr]
-        if pl.endTurn.__code__.co_argcount > 1:
+        if target is not None and isinstance(pl, factions.Faerie):
             pl.endTurn(target)
         else:
             pl.endTurn()
