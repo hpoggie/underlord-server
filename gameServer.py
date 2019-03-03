@@ -13,7 +13,7 @@ from ul_core.core.game import Game, EndOfGame
 from ul_core.core.exceptions import IllegalMoveError
 from ul_core.core.enums import numericEnum
 from ul_core.net.enums import Zone
-import ul_core.factions
+import ul_core.net.factions as factions
 
 
 class ServerError(BaseException):
@@ -92,7 +92,7 @@ class GameServer:
     # actions
 
     def selectFaction(self, addr, index):
-        availableFactions = ul_core.factions.availableFactions
+        availableFactions = factions.availableFactions
         self.factions[self.addrs.index(addr)] = availableFactions[index]
         # If both players have selected their faction, start the game
         started = hasattr(self, 'game')
@@ -187,6 +187,10 @@ class GameServer:
     def play(self, addr, index):
         pl = self.players[addr]
         pl.play(pl.hand[index])
+        self.redraw()
+
+    def useFactionAbility(self, addr, *args):
+        self.players[addr].factionAbility(*args)
         self.redraw()
 
     @acceptsTarget
