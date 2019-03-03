@@ -256,6 +256,8 @@ class GameServer:
             if pl.facedowns.dirty:
                 c.updatePlayerFacedowns(*getZone(pl, pl.facedowns))
 
+            c.updatePlayerFacedownStaleness(*(c.stale for c in pl.facedowns))
+
             c.updatePlayerManaCap(pl.manaCap)
             c.updatePlayerMana(pl.mana)
 
@@ -264,6 +266,8 @@ class GameServer:
             if enemyPlayer.facedowns.dirty:
                 c.updateEnemyFacedowns(
                     *getZone(pl, enemyPlayer.facedowns))
+
+            c.updateEnemyFacedownStaleness(*(c.stale for c in pl.opponent.facedowns))
 
             c.updateEnemyManaCap(enemyPlayer.manaCap)
 
