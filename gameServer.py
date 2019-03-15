@@ -190,7 +190,11 @@ class GameServer:
         self.redraw()
 
     def useFactionAbility(self, addr, *args):
-        self.players[addr].factionAbility(*args)
+        try:
+            self.players[addr].factionAbility(*args)
+        except TypeError:  # Ignore if args are bad
+            pass
+
         self.redraw()
 
     @acceptsTarget
