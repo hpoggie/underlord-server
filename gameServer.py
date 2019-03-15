@@ -16,7 +16,7 @@ from ul_core.net.enums import Zone
 import ul_core.net.factions as factions
 
 
-class ServerError(BaseException):
+class ServerError(Exception):
     pass
 
 
