@@ -15,6 +15,8 @@ from ul_core.core.enums import numericEnum
 from ul_core.net.enums import Zone
 import ul_core.net.factions as factions
 
+from server_event_handler import ServerEventHandler
+
 
 class ServerError(Exception):
     pass
@@ -72,7 +74,8 @@ class GameServer:
         secondPlayer = (firstPlayer + 1) % 2
 
         self.game = Game(self.factions[firstPlayer],
-                         self.factions[secondPlayer])
+                         self.factions[secondPlayer],
+                         ServerEventHandler(self.networkManager.connections))
         self.game.start()
         self.players = dict([
             (self.addrs[firstPlayer], self.game.players[0]),
