@@ -16,6 +16,7 @@ from ul_core.net.enums import Zone
 import ul_core.net.factions as factions
 
 from server_event_handler import ServerEventHandler
+from conversions import *
 
 
 class ServerError(Exception):
@@ -77,13 +78,20 @@ class GameServer:
                          self.factions[secondPlayer],
                          ServerEventHandler(self.networkManager.connections))
         self.game.start()
+
+        # addr->player TODO rename these
         self.players = dict([
             (self.addrs[firstPlayer], self.game.players[0]),
             (self.addrs[secondPlayer], self.game.players[1])])
-        # Make it easy to find connections by addr
+
+        # connection->addr
         self.connections = dict([
             (addr, self.networkManager.connections[i])
             for i, addr in enumerate(self.addrs)])
+
+        # connection->player
+        for i, addr in enumerate(self.addrs):
+            self.networkManager.connections[i].player = self.players[addr]
 
         ndp = self.networkManager.connections[self.notDecidingPlayer]
         if firstPlayer == self.decidingPlayer:

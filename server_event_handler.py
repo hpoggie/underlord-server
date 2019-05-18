@@ -1,6 +1,8 @@
 from ul_core.core.event_handler import EventHandler
 from ul_core.net.network import ClientNetworkManager
 
+from conversions import getCard
+
 
 def playAnimation(conn, name, *args):
     conn.playAnimation(getattr(ClientNetworkManager.Animations, name), *args)
@@ -16,8 +18,10 @@ class ServerEventHandler(EventHandler):
             playAnimation(c, 'on_spawn', card.zone.index(card))
 
     def on_fight(self, c1, c2):
+        # TODO: handle attacking face
         for conn in self.connections:
-            playAnimation(conn, 'on_fight', *(getCard(c1) + getCard(c2)))
+            pl = conn.player
+            playAnimation(conn, 'on_fight', *(getCard(pl, c1) + getCard(pl, c2)))
 
     def on_die(self, card):
         for c in self.connections:
