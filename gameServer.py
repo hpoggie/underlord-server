@@ -89,9 +89,13 @@ class GameServer:
             (addr, self.networkManager.connections[i])
             for i, addr in enumerate(self.addrs)])
 
-        # connection->player
+        # connection->player, player->connection
         for i, addr in enumerate(self.addrs):
-            self.networkManager.connections[i].player = self.players[addr]
+            conn = self.networkManager.connections[i]
+            player = self.players[addr]
+            conn.player = player
+            player.connection = conn
+
 
         ndp = self.networkManager.connections[self.notDecidingPlayer]
         if firstPlayer == self.decidingPlayer:
