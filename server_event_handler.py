@@ -9,6 +9,10 @@ def playAnimation(conn, name, *args):
     conn.playAnimation(getattr(ClientNetworkManager.Animations, name), *args)
 
 
+def expandTargets(pl, targets):
+    return (i for t in targets for i in gameEntityToZie(pl, t))
+
+
 class ServerEventHandler(EventHandler):
     def __init__(self, connections):
         super().__init__()
@@ -35,9 +39,10 @@ class ServerEventHandler(EventHandler):
         pass
 
     def on_reveal_facedown(self, card, targets):
-        #for c in self.connections:
-        #    playAnimation(c, 'on_reveal_facedown', card.cardId, MUNGE(targets))  # TODO
-        pass
+        for c in self.connections:
+            pl = c.player
+            playAnimation(c, 'on_reveal_facedown', card.zone.index(card),
+                          *expandTargets(pl, targets))
 
     def on_play_faceup(self, card, targets):
         #for c in self.connections:
