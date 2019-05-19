@@ -45,9 +45,10 @@ class ServerEventHandler(EventHandler):
                           *expandTargets(pl, targets))
 
     def on_play_faceup(self, card, targets):
-        #for c in self.connections:
-            #playAnimation(c, 'on_play_faceup', card.cardId, MUNGE(targets))  # TODO
-        pass
+        for c in self.connections:
+            pl = c.player
+            playAnimation(c, 'on_play_faceup', card.zone.index(card),
+                          *expandTargets(pl, targets))
 
     def on_play_facedown(self, card):
         #playAnimation(self.connections[card.owner], 'on_play_facedown_visible', card.cardId)
