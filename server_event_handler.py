@@ -1,5 +1,6 @@
 from ul_core.core.event_handler import EventHandler
 from ul_core.net.network import ClientNetworkManager
+from ul_core.net.zie import gameEntityToZie
 
 from conversions import getCard
 
@@ -18,10 +19,9 @@ class ServerEventHandler(EventHandler):
             playAnimation(c, 'on_spawn', card.zone.index(card))
 
     def on_fight(self, c1, c2):
-        # TODO: handle attacking face
         for conn in self.connections:
             pl = conn.player
-            playAnimation(conn, 'on_fight', *(getCard(pl, c1) + getCard(pl, c2)))
+            playAnimation(conn, 'on_fight', *(gameEntityToZie(pl, c1) + gameEntityToZie(pl, c2)))
 
     def on_die(self, card):
         for c in self.connections:
