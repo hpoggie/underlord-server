@@ -9,6 +9,7 @@ import time
 import inspect
 
 from ul_core.net.network_manager import ConnectionClosed
+from ul_core.net.network import GameServerNetworkManager
 from ul_core.core.game import Game, EndOfGame
 from ul_core.core.exceptions import IllegalMoveError
 from ul_core.core.enums import numericEnum
@@ -22,8 +23,7 @@ class ServerError(Exception):
 
 class GameServer:
     def __init__(self, netman):
-        self.networkManager = netman
-        netman.handoff_to(self)
+        self.networkManager = GameServerNetworkManager(self, netman.connections)
         self.addrs = [c.addr for c in self.networkManager.connections]
         self.factions = [None, None]
 
