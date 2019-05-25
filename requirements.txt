@@ -1,1 +1,1 @@
-git+https://github.com/hpoggie/ul_core.git@5dfb648
+git+https://github.com/hpoggie/ul_core.git@dc2afcc
