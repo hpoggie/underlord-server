@@ -33,6 +33,9 @@ class FakeNetworkManager:
     def __init__(self):
         self.connections = [FakeConnection() for i in range(2)]
 
+    def handoff_to(self, new_base):
+        pass
+
 
 class FakeConnection:
     def __init__(self):
