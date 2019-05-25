@@ -14,10 +14,10 @@ class NetworkInstructions:
 lobbyServer = LobbyServer("-v")
 port = lobbyServer.networkManager.port
 netman0 = network.ClientNetworkManager(
-    NetworkInstructions(), "localhost", port)
+    NetworkInstructions(), "localhost", port, state=None)
 netman0.connect(("localhost", port))
 netman1 = network.ClientNetworkManager(
-    NetworkInstructions(), "localhost", port)
+    NetworkInstructions(), "localhost", port, state=None)
 netman1.connect(("localhost", port))
 
 netman0.addPlayer()
