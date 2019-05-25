@@ -90,9 +90,9 @@ class GameServer:
 
         self.redraw()
 
-    def mulligan(self, addr, *indices):
+    def mulligan(self, addr, *cards):
         pl = self.players[addr]
-        pl.mulligan(*[pl.hand[index] for index in indices])
+        pl.mulligan(*cards)
 
         if pl.opponent.hasMulliganed:
             for addr, c in self.connections.items():
