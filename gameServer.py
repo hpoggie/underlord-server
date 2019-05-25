@@ -20,69 +20,10 @@ class ServerError(Exception):
     pass
 
 
-def getCard(player, card):
-    """
-    Convert card to index
-    """
-    def isVisible(c):
-        return (c.zone not in (c.controller.hand, c.controller.facedowns)
-                or c.visible or c.controller is player)
-
-    return ((card.cardId if isVisible(card) else -1), card.owner is not player)
-
-
-def getZone(player, zone):
-    return [i for c in zone for i in getCard(player, c)]
-
-
-def ZIEToCard(pl, targetZone, targetIndex, targetsEnemy):
-    if targetZone == -1:
-        return None
-
-    if targetsEnemy:
-        target = pl.opponent.zones[targetZone][targetIndex]
-    else:
-        target = pl.zones[targetZone][targetIndex]
-
-    return target
-
-
-def acceptsTarget(func):
-    def converted(self, *args):
-        """
-        Convert the indices from the netcode to a card ref
-        """
-        target = None
-        addr = args[0]
-        pl = self.players[addr]
-
-        # Doesn't include self or target
-        nArgs = func.__code__.co_argcount - 2
-
-        try:
-            # Assumes the target arg comes last.
-            # Also assumes single target
-            # TODO: support multiple targets
-            targetIndices = args[nArgs:]
-            targetZone, targetIndex, targetsEnemy = targetIndices
-
-            target = ZIEToCard(pl, targetZone, targetIndex, targetsEnemy)
-        except ValueError:
-            # Only got 1 arg.
-            func(self, *args)
-            return
-        except IndexError:
-            pass
-
-        func(self, *args[:nArgs], target)
-
-    return converted
-
-
 class GameServer:
     def __init__(self, netman):
         self.networkManager = netman
-        self.networkManager.base = self
+        netman.handoff_to(self)
         self.addrs = [c.addr for c in self.networkManager.connections]
         self.factions = [None, None]
 
@@ -158,35 +99,27 @@ class GameServer:
                 c.updateBothPlayersMulliganed()
             self.redraw()
         else:
-            self.connections[addr].updatePlayerHand(*getZone(pl, pl.hand))
+            self.connections[addr].updatePlayerHand(pl.hand)
             self.connections[addr].endRedraw()
 
-    @acceptsTarget
-    def revealFacedown(self, addr, index, target=None):
+    def revealFacedown(self, addr, card, target=None):
         pl = self.players[addr]
-        pl.revealFacedown(pl.facedowns[index], target)
+        pl.revealFacedown(card, target)
         self.redraw()
 
-    @acceptsTarget
-    def playFaceup(self, addr, index, target=None):
+    def playFaceup(self, addr, card, target=None):
         pl = self.players[addr]
-        pl.playFaceup(pl.hand[index], target)
+        pl.playFaceup(card, target)
         self.redraw()
 
-    def attack(self, addr, cardIndex, targetIndex, targetZone):
+    def attack(self, addr, attacker, target):
         pl = self.players[addr]
-        attacker = pl.faceups[cardIndex]
-        if targetZone == Zone.face:
-            target = pl.opponent.face
-        else:
-            target = pl.opponent.zones[targetZone][targetIndex]
-
         pl.attack(attacker, target)
         self.redraw()
 
-    def play(self, addr, index):
+    def play(self, addr, card):
         pl = self.players[addr]
-        pl.play(pl.hand[index])
+        pl.play(card)
         self.redraw()
 
     def useFactionAbility(self, addr, *args):
@@ -197,7 +130,6 @@ class GameServer:
 
         self.redraw()
 
-    @acceptsTarget
     def endTurn(self, addr, target=None):
         pl = self.players[addr]
         if target is not None and isinstance(pl, factions.Faerie):
@@ -206,21 +138,9 @@ class GameServer:
             pl.endTurn()
         self.redraw()
 
-    # TODO: massive kludge
     def makeDecision(self, addr, *cards):
         pl = self.players[addr]
-
-        lst = []
-        for zone, index, enemy in zip(cards[::3], cards[1::3], cards[2::3]):
-            if zone == -1:
-                target = None
-            elif enemy:
-                target = pl.opponent.zones[zone][index]
-            else:
-                target = pl.zones[zone][index]
-            lst.append(target)
-
-        pl.makeRequiredDecision(*lst)
+        pl.makeRequiredDecision(*cards)
         self.redraw()
 
     def useThiefAbility(self, addr, discardIndex, cardname, targetIndex):
@@ -239,7 +159,7 @@ class GameServer:
             c.setActive(int(pl.active))
 
             if pl.faceups.dirty:
-                c.updatePlayerFaceups(*getZone(pl, pl.faceups))
+                c.updatePlayerFaceups(pl.faceups)
 
             for i, card in enumerate(pl.faceups):
                 if hasattr(card, 'counter'):
@@ -248,17 +168,16 @@ class GameServer:
             c.updateHasAttacked(*(c.hasAttacked for c in pl.faceups))
 
             if enemyPlayer.faceups.dirty:
-                c.updateEnemyFaceups(
-                    *getZone(pl, enemyPlayer.faceups))
+                c.updateEnemyFaceups(enemyPlayer.faceups)
 
             for i, card in enumerate(pl.opponent.faceups):
                 if hasattr(card, 'counter'):
                     c.updateEnemyCounter(i, card.counter)
 
             if pl.hand.dirty:
-                c.updatePlayerHand(*getZone(pl, pl.hand))
+                c.updatePlayerHand(pl.hand)
             if pl.facedowns.dirty:
-                c.updatePlayerFacedowns(*getZone(pl, pl.facedowns))
+                c.updatePlayerFacedowns(pl.facedowns)
 
             c.updatePlayerFacedownStaleness(*(c.stale for c in pl.facedowns))
 
@@ -266,20 +185,18 @@ class GameServer:
             c.updatePlayerMana(pl.mana)
 
             if enemyPlayer.hand.dirty:
-                c.updateEnemyHand(*getZone(pl, enemyPlayer.hand))
+                c.updateEnemyHand(enemyPlayer.hand)
             if enemyPlayer.facedowns.dirty:
-                c.updateEnemyFacedowns(
-                    *getZone(pl, enemyPlayer.facedowns))
+                c.updateEnemyFacedowns(enemyPlayer.facedowns)
 
             c.updateEnemyFacedownStaleness(*(c.stale for c in pl.opponent.facedowns))
 
             c.updateEnemyManaCap(enemyPlayer.manaCap)
 
             if pl.graveyard.dirty:
-                c.updatePlayerGraveyard(*getZone(pl, pl.graveyard))
+                c.updatePlayerGraveyard(pl.graveyard)
             if enemyPlayer.graveyard.dirty:
-                c.updateEnemyGraveyard(
-                    *getZone(pl, pl.opponent.graveyard))
+                c.updateEnemyGraveyard(pl.opponent.graveyard)
 
             c.endRedraw()
 
