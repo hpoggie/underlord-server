@@ -77,7 +77,6 @@ class GameServer:
         self.game = Game(self.factions[firstPlayer],
                          self.factions[secondPlayer],
                          ServerEventHandler(self.networkManager.connections))
-        self.game.start()
 
         # addr->player TODO rename these
         self.players = dict([
@@ -96,13 +95,13 @@ class GameServer:
             conn.player = player
             player.connection = conn
 
-
         ndp = self.networkManager.connections[self.notDecidingPlayer]
         if firstPlayer == self.decidingPlayer:
             ndp.enemyGoingFirst()
         else:
             ndp.enemyGoingSecond()
 
+        self.game.start()
         self.redraw()
 
     def mulligan(self, addr, *cards):
