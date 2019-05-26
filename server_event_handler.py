@@ -38,10 +38,8 @@ class ServerEventHandler(EventHandler):
             c.playAnimation('on_play_faceup', card, *targets, player=pl)
 
     def on_play_facedown(self, card):
-        # TODO: do this for both players
-        card.owner.connection.playAnimation('on_play_facedown', card)
-        #playAnimation(self.connections[card.owner], 'on_play_facedown_invisible')
-        pass
+        for conn in self.connections:
+            conn.playAnimation('on_play_facedown', card)
 
     def on_draw(self, card):
         #playAnimation(self.connections[card.owner], 'on_draw_visible', card.cardId)
