@@ -20,12 +20,9 @@ class ServerEventHandler(EventHandler):
         for c in self.connections:
             c.playAnimation('on_die', card)
 
-    # TODO
     def on_change_controller(self, card, original, new):
-        #for conn in self.connections:
-            #playAnimation(conn, 'on_change_controller', card.cardId,
-                          #self.players.index(original), self.players.index(new))
-        pass
+        for conn in self.connections:
+            conn.playAnimation('on_change_controller', card)
 
     def on_reveal_facedown(self, card, targets):
         for c in self.connections:
