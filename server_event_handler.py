@@ -42,9 +42,8 @@ class ServerEventHandler(EventHandler):
             conn.playAnimation('on_play_facedown', card)
 
     def on_draw(self, card):
-        #playAnimation(self.connections[card.owner], 'on_draw_visible', card.cardId)
-        #playAnimation(self.connections[card.owner], 'on_draw_invisible', card.cardId)
-        pass
+        for conn in self.connections:
+            conn.playAnimation('on_draw', card)
 
     def on_end_turn(self, game):
         for c in self.connections:
