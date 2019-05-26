@@ -8,6 +8,7 @@ import sys
 import copy
 import random
 import time
+import argparse
 import ul_core.net.network as network
 
 from ul_core.net.network_manager import ConnectionClosed
@@ -16,11 +17,11 @@ from gameServer import GameServer
 
 
 class LobbyServer:
-    def __init__(self, argv):
+    def __init__(self, verbose):
         self.networkManager = ServerNetworkManager(self)
         self.readyPlayers = []
         self.gameServerProcs = {}
-        self.verbose = self.networkManager.verbose = '-v' in argv
+        self.verbose = self.networkManager.verbose = verbose
 
     def onClientConnected(self, conn):
         for conn in self.networkManager.connections:
@@ -102,7 +103,12 @@ class LobbyServer:
 
 
 if __name__ == "__main__":
-    lobby = LobbyServer(sys.argv)
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--verbose', '-v', action='store_true')
+    args = parser.parse_args()
+
+    lobby = LobbyServer(verbose=args.verbose)
     while 1:
         lobby.acceptConnections()
         time.sleep(0.01)
