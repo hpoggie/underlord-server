@@ -30,12 +30,12 @@ class ServerEventHandler(EventHandler):
     def on_reveal_facedown(self, card, targets):
         for c in self.connections:
             pl = c.player
-            c.playAnimation('on_reveal_facedown', card, targets)
+            c.playAnimation('on_reveal_facedown', card, targets, player=pl)
 
     def on_play_faceup(self, card, targets):
         for c in self.connections:
             pl = c.player
-            c.playAnimation('on_play_faceup', card, targets)
+            c.playAnimation('on_play_faceup', card, targets, player=pl)
 
     def on_play_facedown(self, card):
         # TODO: do this for both players
