@@ -245,6 +245,8 @@ class GameServer:
                 print(e)
             except IllegalMoveError as e:  # Client sent us an illegal move
                 print(e)
+                for conn in self.networkManager.connections:
+                    conn.illegalMove()
                 self.redraw()
             except EndOfGame as e:
                 self.endGame(e.winner)
