@@ -20,6 +20,10 @@ class ServerEventHandler(EventHandler):
         for c in self.connections:
             c.playAnimation('on_die', card)
 
+    def on_fizzle(self, card):
+        for c in self.connections:
+            c.playAnimation('on_fizzle', card)
+
     def on_change_controller(self, card, original, new):
         for conn in self.connections:
             conn.playAnimation('on_change_controller', card)
