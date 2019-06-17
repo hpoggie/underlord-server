@@ -51,7 +51,7 @@ class LobbyServer:
     # End of network functions
     #
 
-    def updateNumPlayers(self):
+    def update_num_players(self):
         self.requestNumPlayers(None)
 
     def accept_connections(self):
@@ -66,7 +66,7 @@ class LobbyServer:
                 self.readyPlayers.remove(c.conn)
             except ValueError:
                 pass
-            self.updateNumPlayers()  # Tell everyone they DC'd
+            self.update_num_players()  # Tell everyone they DC'd
         except AttributeError as e:
             print("Client probably sending stuff it shouldn't: " + str(e))
 
