@@ -21,6 +21,11 @@ class LobbyServer:
         self.gameServerProcs = {}
         self.verbose = self.networkManager.verbose = verbose
 
+    #
+    # Network functions
+    # These must be named in camelCase for compatibility reasons
+    #
+
     def onClientConnected(self, conn):
         for conn in self.networkManager.connections:
             conn.updateNumPlayers(len(self.networkManager.connections))
@@ -35,15 +40,19 @@ class LobbyServer:
                 print("connection reset")
                 pass  # If they dc'd, don't worry about it
 
-    def updateNumPlayers(self):
-        self.requestNumPlayers(None)
-
     def addPlayer(self, addr):
         conn = next(
             conn for conn in self.networkManager.connections
             if conn.addr == addr)
         if conn not in self.readyPlayers:
             self.readyPlayers.append(conn)
+
+    #
+    # End of network functions
+    #
+
+    def updateNumPlayers(self):
+        self.requestNumPlayers(None)
 
     def accept_connections(self):
         try:
