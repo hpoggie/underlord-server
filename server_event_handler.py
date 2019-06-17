@@ -1,5 +1,4 @@
 from ul_core.core.event_handler import EventHandler
-from ul_core.net.network import ClientNetworkManager
 
 
 class ServerEventHandler(EventHandler):

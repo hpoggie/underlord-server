@@ -6,17 +6,13 @@ Takes the client's actions and computes the results, then sends them back.
 import traceback
 import random
 import time
-import inspect
 
 from ul_core.net.network_manager import ConnectionClosed
 from ul_core.core.game import Game, EndOfGame
 from ul_core.core.exceptions import IllegalMoveError
-from ul_core.core.enums import numericEnum
-from ul_core.net.enums import Zone
 import ul_core.net.factions as factions
 
 from server_event_handler import ServerEventHandler
-from conversions import *
 
 
 class ServerError(Exception):

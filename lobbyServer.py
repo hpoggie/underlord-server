@@ -4,11 +4,9 @@ This is the way you should usually run the server
 """
 
 import os
-import sys
 import copy
 import random
 import time
-import argparse
 import ul_core.net.network as network
 
 from ul_core.net.network_manager import ConnectionClosed
