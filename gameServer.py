@@ -228,7 +228,7 @@ class GameServer:
             for z in pl.zones:
                 z.dirty = False
 
-    def endGame(self, winner):
+    def end_game(self, winner):
         for addr, pl in self.players.items():
             if pl == winner:
                 self.connections[addr].winGame()
@@ -251,7 +251,7 @@ class GameServer:
                     conn.illegalMove()
                 self.redraw()
             except EndOfGame as e:
-                self.endGame(e.winner)
+                self.end_game(e.winner)
                 exit(0)
             except ConnectionClosed as c:
                 if c in self.networkManager.connections:
@@ -259,7 +259,7 @@ class GameServer:
                 # If you DC, your opponent wins
                 if hasattr(self, 'players'):
                     try:
-                        self.endGame(self.players[c.conn.addr].opponent)
+                        self.end_game(self.players[c.conn.addr].opponent)
                     except (BrokenPipeError, ConnectionClosed):
                         # Opponent also DC'd
                         pass
