@@ -45,7 +45,7 @@ class LobbyServer:
         if conn not in self.readyPlayers:
             self.readyPlayers.append(conn)
 
-    def acceptConnections(self):
+    def accept_connections(self):
         try:
             self.networkManager.accept()
             self.networkManager.recv()
@@ -62,9 +62,9 @@ class LobbyServer:
             print("Client probably sending stuff it shouldn't: " + str(e))
 
         # Get the first 2 ready players
-        readyPlayers = self.readyPlayers[:2]
+        ready_players = self.readyPlayers[:2]
 
-        if len(readyPlayers) == 2:
+        if len(ready_players) == 2:
             if self.verbose:
                 print("Game time started. Forking subprocess.")
             f = os.fork()
@@ -77,8 +77,8 @@ class LobbyServer:
             else:
                 self.networkManager.connections = [
                     c for c in self.networkManager.connections
-                    if c not in readyPlayers]
-                self.gameServerProcs[f] = readyPlayers
+                    if c not in ready_players]
+                self.gameServerProcs[f] = ready_players
                 # Remove the 2 players from the list of ready players
                 self.readyPlayers = self.readyPlayers[2:]
 
@@ -86,11 +86,11 @@ class LobbyServer:
             # Clean up when the game server finishes
             pid = os.waitpid(-1, os.WNOHANG)[0]
             if pid != 0:
-                self.onGameServerFinished(pid)
+                self.on_game_server_finished(pid)
             else:
                 break
 
-    def onGameServerFinished(self, procid):
+    def on_game_server_finished(self, procid):
         """
         Send the player back to the lobby when the child proc finishes
         """
@@ -108,5 +108,5 @@ if __name__ == "__main__":
 
     lobby = LobbyServer(verbose=args.verbose)
     while 1:
-        lobby.acceptConnections()
+        lobby.accept_connections()
         time.sleep(0.01)

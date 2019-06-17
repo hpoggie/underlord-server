@@ -32,8 +32,8 @@ class GameServer:
     # actions
 
     def selectFaction(self, addr, index):
-        availableFactions = factions.availableFactions
-        self.factions[self.addrs.index(addr)] = availableFactions[index]
+        available_factions = factions.availableFactions
+        self.factions[self.addrs.index(addr)] = available_factions[index]
         # If both players have selected their faction, start the game
         started = hasattr(self, 'game')
         if (None not in self.factions and
@@ -43,11 +43,11 @@ class GameServer:
             for i in range(len(self.factions)):
                 self.networkManager.connections[
                     (i + 1) % len(self.factions)].updateEnemyFaction(
-                    availableFactions.index(self.factions[i]))
+                    available_factions.index(self.factions[i]))
 
-            self.waitOnGoingFirstDecision()
+            self.wait_on_going_first_decision()
 
-    def waitOnGoingFirstDecision(self):
+    def wait_on_going_first_decision(self):
         self.decidingPlayer = random.randint(0, 1)
         self.notDecidingPlayer = (self.decidingPlayer + 1) % 2
         conn = self.networkManager.connections[self.decidingPlayer]
@@ -59,25 +59,25 @@ class GameServer:
             return
 
         if value:
-            firstPlayer = self.decidingPlayer
+            first_player = self.decidingPlayer
         else:
-            firstPlayer = self.notDecidingPlayer
+            first_player = self.notDecidingPlayer
 
-        self.start(firstPlayer)
+        self.start(first_player)
         del self.decidingPlayer
         del self.notDecidingPlayer
 
-    def start(self, firstPlayer):
-        secondPlayer = (firstPlayer + 1) % 2
+    def start(self, first_player):
+        second_player = (first_player + 1) % 2
 
-        self.game = Game(self.factions[firstPlayer],
-                         self.factions[secondPlayer],
+        self.game = Game(self.factions[first_player],
+                         self.factions[second_player],
                          ServerEventHandler(self.networkManager.connections))
 
         # addr->player TODO rename these
         self.players = dict([
-            (self.addrs[firstPlayer], self.game.players[0]),
-            (self.addrs[secondPlayer], self.game.players[1])])
+            (self.addrs[first_player], self.game.players[0]),
+            (self.addrs[second_player], self.game.players[1])])
 
         # connection->addr
         self.connections = dict([
@@ -92,7 +92,7 @@ class GameServer:
             player.connection = conn
 
         ndp = self.networkManager.connections[self.notDecidingPlayer]
-        if firstPlayer == self.decidingPlayer:
+        if first_player == self.decidingPlayer:
             ndp.enemyGoingFirst()
         else:
             ndp.enemyGoingSecond()
@@ -153,18 +153,18 @@ class GameServer:
         pl.makeRequiredDecision(*cards)
         self.redraw()
 
-    def useThiefAbility(self, addr, discardIndex, cardname, targetIndex):
+    def useThiefAbility(self, addr, discard_index, cardname, target_index):
         pl = self.players[addr]
         pl.thiefAbility(
-            pl.hand[discardIndex],
+            pl.hand[discard_index],
             cardname,
-            pl.opponent.facedowns[targetIndex])
+            pl.opponent.facedowns[target_index])
         self.redraw()
 
     def redraw(self):
         for addr, pl in self.players.items():
             c = self.connections[addr]
-            enemyPlayer = pl.opponent
+            enemy_player = pl.opponent
 
             c.setActive(int(pl.active))
 
@@ -177,8 +177,8 @@ class GameServer:
 
             c.updateHasAttacked(*(c.hasAttacked for c in pl.faceups))
 
-            if enemyPlayer.faceups.dirty:
-                c.updateEnemyFaceups(enemyPlayer.faceups)
+            if enemy_player.faceups.dirty:
+                c.updateEnemyFaceups(enemy_player.faceups)
 
             for i, card in enumerate(pl.opponent.faceups):
                 if hasattr(card, 'counter'):
@@ -194,33 +194,32 @@ class GameServer:
             c.updatePlayerManaCap(pl.manaCap)
             c.updatePlayerMana(pl.mana)
 
-            if enemyPlayer.hand.dirty:
-                c.updateEnemyHand(enemyPlayer.hand)
-            if enemyPlayer.facedowns.dirty:
-                c.updateEnemyFacedowns(enemyPlayer.facedowns)
+            if enemy_player.hand.dirty:
+                c.updateEnemyHand(enemy_player.hand)
+            if enemy_player.facedowns.dirty:
+                c.updateEnemyFacedowns(enemy_player.facedowns)
 
             c.updateEnemyFacedownStaleness(*(c.stale for c in pl.opponent.facedowns))
 
-            c.updateEnemyManaCap(enemyPlayer.manaCap)
+            c.updateEnemyManaCap(enemy_player.manaCap)
 
             if pl.graveyard.dirty:
                 c.updatePlayerGraveyard(pl.graveyard)
-            if enemyPlayer.graveyard.dirty:
+            if enemy_player.graveyard.dirty:
                 c.updateEnemyGraveyard(pl.opponent.graveyard)
 
             c.endRedraw()
 
         if self.game.requiredDecision is not None:
-            effectOwner = self.game.requiredDecision.owner
+            effect_owner = self.game.requiredDecision.owner
             c = self.connections[next(addr for addr, player
-                    in self.players.items() if player == effectOwner)]
+                    in self.players.items() if player == effect_owner)]
             c.requestDecision(
                 self.game.requiredDecision.func.__code__.co_argcount)
 
         for pl in self.game.players:
             for z in pl.zones:
                 z.dirty = False
-
 
     def endGame(self, winner):
         for addr, pl in self.players.items():
@@ -229,7 +228,7 @@ class GameServer:
             else:
                 self.connections[addr].loseGame()
 
-    def kickEveryone(self):
+    def kick_everyone(self):
         for c in self.networkManager.connections:
             c.kick()
 
@@ -259,14 +258,14 @@ class GameServer:
                         pass
                 else:
                     try:
-                        self.kickEveryone()
+                        self.kick_everyone()
                     except (BrokenPipeError, ConnectionClosed):
                         pass
                 exit(0)
             except Exception as e:  # We died due to some other error
                 print(e)
                 print(traceback.format_exc())
-                self.kickEveryone()
+                self.kick_everyone()
                 exit(1)
 
             time.sleep(0.01)

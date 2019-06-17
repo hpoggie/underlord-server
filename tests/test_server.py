@@ -55,5 +55,5 @@ def testKickPlayer():
     c = gs.networkManager.connections[0]
     c.kick = types.MethodType(kick, c)
 
-    gs.kickEveryone()
+    gs.kick_everyone()
     assert hasattr(gs.networkManager.connections[0], 'kicked')
