@@ -29,7 +29,10 @@ class GameServer:
         for conn in self.networkManager.connections:
             conn.onEnteredGame()
 
-    # actions
+    #
+    # Network functions
+    # These must be named in camelCase for compatibility reasons
+    #
 
     def selectFaction(self, addr, index):
         available_factions = factions.availableFactions
@@ -47,12 +50,6 @@ class GameServer:
 
             self.wait_on_going_first_decision()
 
-    def wait_on_going_first_decision(self):
-        self.decidingPlayer = random.randint(0, 1)
-        self.notDecidingPlayer = (self.decidingPlayer + 1) % 2
-        conn = self.networkManager.connections[self.decidingPlayer]
-        conn.requestGoingFirstDecision()
-
     def decideWhetherToGoFirst(self, addr, value):
         if self.addrs.index(addr) is not self.decidingPlayer:
             print("That player doesn't get to decide who goes first.")
@@ -66,39 +63,6 @@ class GameServer:
         self.start(first_player)
         del self.decidingPlayer
         del self.notDecidingPlayer
-
-    def start(self, first_player):
-        second_player = (first_player + 1) % 2
-
-        self.game = Game(self.factions[first_player],
-                         self.factions[second_player],
-                         ServerEventHandler(self.networkManager.connections))
-
-        # addr->player TODO rename these
-        self.players = dict([
-            (self.addrs[first_player], self.game.players[0]),
-            (self.addrs[second_player], self.game.players[1])])
-
-        # connection->addr
-        self.connections = dict([
-            (addr, self.networkManager.connections[i])
-            for i, addr in enumerate(self.addrs)])
-
-        # connection->player, player->connection
-        for i, addr in enumerate(self.addrs):
-            conn = self.networkManager.connections[i]
-            player = self.players[addr]
-            conn.player = player
-            player.connection = conn
-
-        ndp = self.networkManager.connections[self.notDecidingPlayer]
-        if first_player == self.decidingPlayer:
-            ndp.enemyGoingFirst()
-        else:
-            ndp.enemyGoingSecond()
-
-        self.game.start()
-        self.redraw()
 
     def mulligan(self, addr, *cards):
         pl = self.players[addr]
@@ -159,6 +123,49 @@ class GameServer:
             pl.hand[discard_index],
             cardname,
             pl.opponent.facedowns[target_index])
+        self.redraw()
+
+    #
+    # End of network functions
+    #
+
+    def wait_on_going_first_decision(self):
+        self.decidingPlayer = random.randint(0, 1)
+        self.notDecidingPlayer = (self.decidingPlayer + 1) % 2
+        conn = self.networkManager.connections[self.decidingPlayer]
+        conn.requestGoingFirstDecision()
+
+    def start(self, first_player):
+        second_player = (first_player + 1) % 2
+
+        self.game = Game(self.factions[first_player],
+                         self.factions[second_player],
+                         ServerEventHandler(self.networkManager.connections))
+
+        # addr->player TODO rename these
+        self.players = dict([
+            (self.addrs[first_player], self.game.players[0]),
+            (self.addrs[second_player], self.game.players[1])])
+
+        # connection->addr
+        self.connections = dict([
+            (addr, self.networkManager.connections[i])
+            for i, addr in enumerate(self.addrs)])
+
+        # connection->player, player->connection
+        for i, addr in enumerate(self.addrs):
+            conn = self.networkManager.connections[i]
+            player = self.players[addr]
+            conn.player = player
+            player.connection = conn
+
+        ndp = self.networkManager.connections[self.notDecidingPlayer]
+        if first_player == self.decidingPlayer:
+            ndp.enemyGoingFirst()
+        else:
+            ndp.enemyGoingSecond()
+
+        self.game.start()
         self.redraw()
 
     def redraw(self):
