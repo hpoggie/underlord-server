@@ -38,9 +38,8 @@ class GameServer:
         available_factions = factions.availableFactions
         self.factions[self.addrs.index(addr)] = available_factions[index]
         # If both players have selected their faction, start the game
-        started = hasattr(self, 'game')
         if (None not in self.factions and
-                not started and
+                not hasattr(self, 'game') and
                 not hasattr(self, 'deciding_player')):
             # TODO: kludge
             for i in range(len(self.factions)):
