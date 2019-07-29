@@ -11,6 +11,7 @@ from ul_core.net.network_manager import ConnectionClosed
 from ul_core.core.game import Game, EndOfGame
 from ul_core.core.exceptions import IllegalMoveError
 import ul_core.net.factions as factions
+from ul_core.core.enums import numericEnum
 
 from server_event_handler import ServerEventHandler
 
@@ -19,12 +20,16 @@ class ServerError(Exception):
     pass
 
 
+State = numericEnum('FactionSelect', 'GoingFirstDecision', 'Mulligan', 'Playing')
+
+
 class GameServer:
     def __init__(self, netman):
         self.network_manager = netman
         netman.handoff_to(self)
         self.addrs = [c.addr for c in self.network_manager.connections]
         self.factions = [None, None]
+        self.state = State.FactionSelect
 
         for conn in self.network_manager.connections:
             conn.onEnteredGame()
@@ -38,9 +43,7 @@ class GameServer:
         available_factions = factions.availableFactions
         self.factions[self.addrs.index(addr)] = available_factions[index]
         # If both players have selected their faction, start the game
-        if (None not in self.factions and
-                not hasattr(self, 'game') and
-                not hasattr(self, 'deciding_player')):
+        if None not in self.factions and self.state == State.FactionSelect:
             # TODO: kludge
             for i in range(len(self.factions)):
                 self.network_manager.connections[
@@ -60,8 +63,6 @@ class GameServer:
             first_player = self.not_deciding_player
 
         self.start(first_player)
-        del self.deciding_player
-        del self.not_deciding_player
 
     def mulligan(self, addr, *cards):
         pl = self.players[addr]
@@ -71,6 +72,7 @@ class GameServer:
             for addr, c in self.connections.items():
                 c.updateBothPlayersMulliganed()
             self.redraw()
+            self.state = State.Playing
         else:
             self.connections[addr].updatePlayerHand(pl.hand)
             self.connections[addr].endRedraw()
@@ -129,12 +131,15 @@ class GameServer:
     #
 
     def wait_on_going_first_decision(self):
+        self.state = State.GoingFirstDecision
         self.deciding_player = random.randint(0, 1)
         self.not_deciding_player = (self.deciding_player + 1) % 2
         conn = self.network_manager.connections[self.deciding_player]
         conn.requestGoingFirstDecision()
 
     def start(self, first_player):
+        self.state = State.Mulligan
+
         second_player = (first_player + 1) % 2
 
         self.game = Game(self.factions[first_player],
