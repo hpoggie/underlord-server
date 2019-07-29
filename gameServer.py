@@ -21,12 +21,12 @@ class ServerError(Exception):
 
 class GameServer:
     def __init__(self, netman):
-        self.networkManager = netman
+        self.network_manager = netman
         netman.handoff_to(self)
-        self.addrs = [c.addr for c in self.networkManager.connections]
+        self.addrs = [c.addr for c in self.network_manager.connections]
         self.factions = [None, None]
 
-        for conn in self.networkManager.connections:
+        for conn in self.network_manager.connections:
             conn.onEnteredGame()
 
     #
@@ -41,28 +41,28 @@ class GameServer:
         started = hasattr(self, 'game')
         if (None not in self.factions and
                 not started and
-                not hasattr(self, 'decidingPlayer')):
+                not hasattr(self, 'deciding_player')):
             # TODO: kludge
             for i in range(len(self.factions)):
-                self.networkManager.connections[
+                self.network_manager.connections[
                     (i + 1) % len(self.factions)].updateEnemyFaction(
                     available_factions.index(self.factions[i]))
 
             self.wait_on_going_first_decision()
 
     def decideWhetherToGoFirst(self, addr, value):
-        if self.addrs.index(addr) is not self.decidingPlayer:
+        if self.addrs.index(addr) is not self.deciding_player:
             print("That player doesn't get to decide who goes first.")
             return
 
         if value:
-            first_player = self.decidingPlayer
+            first_player = self.deciding_player
         else:
-            first_player = self.notDecidingPlayer
+            first_player = self.not_deciding_player
 
         self.start(first_player)
-        del self.decidingPlayer
-        del self.notDecidingPlayer
+        del self.deciding_player
+        del self.not_deciding_player
 
     def mulligan(self, addr, *cards):
         pl = self.players[addr]
@@ -130,9 +130,9 @@ class GameServer:
     #
 
     def wait_on_going_first_decision(self):
-        self.decidingPlayer = random.randint(0, 1)
-        self.notDecidingPlayer = (self.decidingPlayer + 1) % 2
-        conn = self.networkManager.connections[self.decidingPlayer]
+        self.deciding_player = random.randint(0, 1)
+        self.not_deciding_player = (self.deciding_player + 1) % 2
+        conn = self.network_manager.connections[self.deciding_player]
         conn.requestGoingFirstDecision()
 
     def start(self, first_player):
@@ -140,7 +140,7 @@ class GameServer:
 
         self.game = Game(self.factions[first_player],
                          self.factions[second_player],
-                         ServerEventHandler(self.networkManager.connections))
+                         ServerEventHandler(self.network_manager.connections))
 
         # addr->player TODO rename these
         self.players = dict([
@@ -149,18 +149,18 @@ class GameServer:
 
         # connection->addr
         self.connections = dict([
-            (addr, self.networkManager.connections[i])
+            (addr, self.network_manager.connections[i])
             for i, addr in enumerate(self.addrs)])
 
         # connection->player, player->connection
         for i, addr in enumerate(self.addrs):
-            conn = self.networkManager.connections[i]
+            conn = self.network_manager.connections[i]
             player = self.players[addr]
             conn.player = player
             player.connection = conn
 
-        ndp = self.networkManager.connections[self.notDecidingPlayer]
-        if first_player == self.decidingPlayer:
+        ndp = self.network_manager.connections[self.not_deciding_player]
+        if first_player == self.deciding_player:
             ndp.enemyGoingFirst()
         else:
             ndp.enemyGoingSecond()
@@ -236,26 +236,26 @@ class GameServer:
                 self.connections[addr].loseGame()
 
     def kick_everyone(self):
-        for c in self.networkManager.connections:
+        for c in self.network_manager.connections:
             c.kick()
 
     def run(self):
         while 1:
             try:
-                self.networkManager.recv()
+                self.network_manager.recv()
             except IndexError as e:
                 print(e)
             except IllegalMoveError as e:  # Client sent us an illegal move
                 print(e)
-                for conn in self.networkManager.connections:
+                for conn in self.network_manager.connections:
                     conn.illegalMove()
                 self.redraw()
             except EndOfGame as e:
                 self.end_game(e.winner)
                 exit(0)
             except ConnectionClosed as c:
-                if c in self.networkManager.connections:
-                    self.networkManager.connections.remove(c)
+                if c in self.network_manager.connections:
+                    self.network_manager.connections.remove(c)
                 # If you DC, your opponent wins
                 if hasattr(self, 'players'):
                     try:

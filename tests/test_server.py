@@ -12,7 +12,7 @@ class NetworkInstructions:
 
 
 lobbyServer = LobbyServer("-v")
-port = lobbyServer.networkManager.port
+port = lobbyServer.network_manager.port
 netman0 = network.ClientNetworkManager(
     NetworkInstructions(), "localhost", port, state=None)
 netman0.connect(("localhost", port))
@@ -52,8 +52,8 @@ def testKickPlayer():
     def kick(self):
         self.kicked = True
 
-    c = gs.networkManager.connections[0]
+    c = gs.network_manager.connections[0]
     c.kick = types.MethodType(kick, c)
 
     gs.kick_everyone()
-    assert hasattr(gs.networkManager.connections[0], 'kicked')
+    assert hasattr(gs.network_manager.connections[0], 'kicked')

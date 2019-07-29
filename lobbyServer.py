@@ -16,10 +16,10 @@ from gameServer import GameServer
 
 class LobbyServer:
     def __init__(self, verbose):
-        self.networkManager = ServerNetworkManager(self)
-        self.readyPlayers = []
-        self.gameServerProcs = {}
-        self.verbose = self.networkManager.verbose = verbose
+        self.network_manager = ServerNetworkManager(self)
+        self.ready_players = []
+        self.game_server_procs = {}
+        self.verbose = self.network_manager.verbose = verbose
 
     #
     # Network functions
@@ -27,25 +27,25 @@ class LobbyServer:
     #
 
     def onClientConnected(self, conn):
-        for conn in self.networkManager.connections:
-            conn.updateNumPlayers(len(self.networkManager.connections))
+        for conn in self.network_manager.connections:
+            conn.updateNumPlayers(len(self.network_manager.connections))
         if self.verbose:
             print("Client connected from " + str(conn.addr))
 
     def requestNumPlayers(self, addr):
-        for conn in self.networkManager.connections:
+        for conn in self.network_manager.connections:
             try:
-                conn.updateNumPlayers(len(self.networkManager.connections))
+                conn.updateNumPlayers(len(self.network_manager.connections))
             except (ConnectionResetError, BrokenPipeError):
                 print("connection reset")
                 pass  # If they dc'd, don't worry about it
 
     def addPlayer(self, addr):
         conn = next(
-            conn for conn in self.networkManager.connections
+            conn for conn in self.network_manager.connections
             if conn.addr == addr)
-        if conn not in self.readyPlayers:
-            self.readyPlayers.append(conn)
+        if conn not in self.ready_players:
+            self.ready_players.append(conn)
 
     #
     # End of network functions
@@ -56,14 +56,14 @@ class LobbyServer:
 
     def accept_connections(self):
         try:
-            self.networkManager.accept()
-            self.networkManager.recv()
+            self.network_manager.accept()
+            self.network_manager.recv()
         except network.OpcodeError as e:
             print(e)
         except ConnectionClosed as c:
-            self.networkManager.connections.remove(c.conn)
+            self.network_manager.connections.remove(c.conn)
             try:
-                self.readyPlayers.remove(c.conn)
+                self.ready_players.remove(c.conn)
             except ValueError:
                 pass
             self.update_num_players()  # Tell everyone they DC'd
@@ -71,7 +71,7 @@ class LobbyServer:
             print("Client probably sending stuff it shouldn't: " + str(e))
 
         # Get the first 2 ready players
-        ready_players = self.readyPlayers[:2]
+        ready_players = self.ready_players[:2]
 
         if len(ready_players) == 2:
             if self.verbose:
@@ -79,19 +79,19 @@ class LobbyServer:
             f = os.fork()
             if f == 0:
                 random.seed()  # Regenerate the random seed for this game
-                netman = copy.copy(self.networkManager)
+                netman = copy.copy(self.network_manager)
                 # We need only the players for the game we're currently serving
-                netman.connections = self.readyPlayers
+                netman.connections = self.ready_players
                 GameServer(netman).run()
             else:
-                self.networkManager.connections = [
-                    c for c in self.networkManager.connections
+                self.network_manager.connections = [
+                    c for c in self.network_manager.connections
                     if c not in ready_players]
-                self.gameServerProcs[f] = ready_players
+                self.game_server_procs[f] = ready_players
                 # Remove the 2 players from the list of ready players
-                self.readyPlayers = self.readyPlayers[2:]
+                self.ready_players = self.ready_players[2:]
 
-        while len(self.gameServerProcs) > 0:
+        while len(self.game_server_procs) > 0:
             # Clean up when the game server finishes
             pid = os.waitpid(-1, os.WNOHANG)[0]
             if pid != 0:
@@ -103,10 +103,10 @@ class LobbyServer:
         """
         Send the player back to the lobby when the child proc finishes
         """
-        for pl in self.gameServerProcs[procid]:
-            self.networkManager.connections.append(pl)
+        for pl in self.game_server_procs[procid]:
+            self.network_manager.connections.append(pl)
 
-        self.gameServerProcs.pop(procid)
+        self.game_server_procs.pop(procid)
 
 
 if __name__ == "__main__":
