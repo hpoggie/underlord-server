@@ -34,6 +34,16 @@ class GameServer:
         for conn in self.network_manager.connections:
             conn.onEnteredGame()
 
+    def other_connection(self, conn):
+        """
+        Get the other connection from this one
+        """
+        idx = self.network_manager.connections.index(conn)
+        if idx == 0:
+            return self.network_manager.connections[1]
+        else:
+            return self.network_manager.connections[0]
+
     #
     # Network functions
     # These must be named in camelCase for compatibility reasons
@@ -48,10 +58,8 @@ class GameServer:
         self.factions[self.addrs.index(addr)] = available_factions[index]
         # If both players have selected their faction, start the game
         if None not in self.factions:
-            # TODO: kludge
-            for i in range(len(self.factions)):
-                self.network_manager.connections[
-                    (i + 1) % len(self.factions)].updateEnemyFaction(
+            for i, conn in enumerate(self.network_manager.connections):
+                self.other_connection(conn).updateEnemyFaction(
                     available_factions.index(self.factions[i]))
 
             self.wait_on_going_first_decision()
