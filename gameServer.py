@@ -40,10 +40,14 @@ class GameServer:
     #
 
     def selectFaction(self, addr, index):
+        if self.state != State.FactionSelect:
+            print("Can't select faction in state " + str(self.state))
+            return
+
         available_factions = factions.availableFactions
         self.factions[self.addrs.index(addr)] = available_factions[index]
         # If both players have selected their faction, start the game
-        if None not in self.factions and self.state == State.FactionSelect:
+        if None not in self.factions:
             # TODO: kludge
             for i in range(len(self.factions)):
                 self.network_manager.connections[
@@ -53,6 +57,10 @@ class GameServer:
             self.wait_on_going_first_decision()
 
     def decideWhetherToGoFirst(self, addr, value):
+        if self.state != State.GoingFirstDecision:
+            print("Can't decide whether to go first in state " + str(self.state))
+            return
+
         if self.addrs.index(addr) is not self.deciding_player:
             print("That player doesn't get to decide who goes first.")
             return
