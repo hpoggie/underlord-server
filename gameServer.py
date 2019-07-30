@@ -20,7 +20,7 @@ class ServerError(Exception):
     pass
 
 
-State = numericEnum('FactionSelect', 'GoingFirstDecision', 'Mulligan', 'Playing')
+State = numericEnum('FactionSelect', 'GoingFirstDecision', 'Playing')
 
 
 class GameServer:
@@ -146,7 +146,7 @@ class GameServer:
         conn.requestGoingFirstDecision()
 
     def start(self, first_player):
-        self.state = State.Mulligan
+        self.state = State.Playing
 
         second_player = (first_player + 1) % 2
 
