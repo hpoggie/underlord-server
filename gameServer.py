@@ -269,7 +269,7 @@ class GameServer:
                 if c in self.network_manager.connections:
                     self.network_manager.connections.remove(c)
                 # If you DC, your opponent wins
-                if hasattr(self, 'players'):
+                if self.state == State.Playing:
                     try:
                         self.end_game(self.players[c.conn.addr].opponent)
                     except (BrokenPipeError, ConnectionClosed):
