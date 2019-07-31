@@ -85,13 +85,13 @@ class GameServer:
         pl.mulligan(*cards)
 
         if pl.opponent.hasMulliganed:
-            for addr, c in self.connections.items():
+            for c in self.network_manager.connections:
                 c.updateBothPlayersMulliganed()
             self.redraw()
             self.state = State.Playing
         else:
-            self.connections[addr].updatePlayerHand(pl.hand)
-            self.connections[addr].endRedraw()
+            pl.connection.updatePlayerHand(pl.hand)
+            pl.connection.endRedraw()
 
     def revealFacedown(self, addr, card, target=None):
         pl = self.players[addr]
@@ -167,11 +167,6 @@ class GameServer:
             (self.addrs[first_player], self.game.players[0]),
             (self.addrs[second_player], self.game.players[1])])
 
-        # connection->addr
-        self.connections = dict([
-            (addr, self.network_manager.connections[i])
-            for i, addr in enumerate(self.addrs)])
-
         # connection->player, player->connection
         for i, addr in enumerate(self.addrs):
             conn = self.network_manager.connections[i]
@@ -189,8 +184,8 @@ class GameServer:
         self.redraw()
 
     def redraw(self):
-        for addr, pl in self.players.items():
-            c = self.connections[addr]
+        for pl in self.game.players:
+            c = pl.connection
             enemy_player = pl.opponent
 
             c.setActive(int(pl.active))
@@ -239,8 +234,7 @@ class GameServer:
 
         if self.game.requiredDecision is not None:
             effect_owner = self.game.requiredDecision.owner
-            c = self.connections[next(addr for addr, player
-                    in self.players.items() if player == effect_owner)]
+            c = effect_owner.connection
             c.requestDecision(
                 self.game.requiredDecision.func.__code__.co_argcount)
 
@@ -249,11 +243,11 @@ class GameServer:
                 z.dirty = False
 
     def end_game(self, winner):
-        for addr, pl in self.players.items():
+        for pl in self.game.players:
             if pl == winner:
-                self.connections[addr].winGame()
+                pl.connection.winGame()
             else:
-                self.connections[addr].loseGame()
+                pl.connection.loseGame()
 
     def kick_everyone(self):
         for c in self.network_manager.connections:
@@ -279,7 +273,7 @@ class GameServer:
                 # If you DC, your opponent wins
                 if self.state == State.Playing:
                     try:
-                        self.end_game(self.players[c.conn.addr].opponent)
+                        self.end_game(c.conn.player.opponent)
                     except (BrokenPipeError, ConnectionClosed):
                         # Opponent also DC'd
                         pass
