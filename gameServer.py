@@ -20,7 +20,7 @@ class ServerError(Exception):
     pass
 
 
-State = numericEnum('FactionSelect', 'GoingFirstDecision', 'Playing')
+State = numericEnum('FactionSelect', 'Playing')
 
 
 class GameServer:
@@ -62,23 +62,10 @@ class GameServer:
                 self.other_connection(conn).updateEnemyFaction(
                     available_factions.index(self.factions[i]))
 
-            self.wait_on_going_first_decision()
-
-    def decideWhetherToGoFirst(self, addr, value):
-        if self.state != State.GoingFirstDecision:
-            print("Can't decide whether to go first in state " + str(self.state))
-            return
-
-        if self.addrs.index(addr) is not self.deciding_player:
-            print("That player doesn't get to decide who goes first.")
-            return
-
-        if value:
+            self.deciding_player = random.randint(0, 1)
+            self.not_deciding_player = (self.deciding_player + 1) % 2
             first_player = self.deciding_player
-        else:
-            first_player = self.not_deciding_player
-
-        self.start(first_player)
+            self.start(first_player)
 
     def mulligan(self, addr, *cards):
         pl = self.players[addr]
@@ -146,13 +133,6 @@ class GameServer:
     # End of network functions
     #
 
-    def wait_on_going_first_decision(self):
-        self.state = State.GoingFirstDecision
-        self.deciding_player = random.randint(0, 1)
-        self.not_deciding_player = (self.deciding_player + 1) % 2
-        conn = self.network_manager.connections[self.deciding_player]
-        conn.requestGoingFirstDecision()
-
     def start(self, first_player):
         self.state = State.Playing
 
@@ -173,6 +153,12 @@ class GameServer:
             player = self.players[addr]
             conn.player = player
             player.connection = conn
+
+        dp = self.network_manager.connections[self.deciding_player]
+        if first_player == dp:
+            dp.enemyGoingSecond()
+        else:
+            dp.enemyGoingFirst()
 
         ndp = self.network_manager.connections[self.not_deciding_player]
         if first_player == self.deciding_player:
