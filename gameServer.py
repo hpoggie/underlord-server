@@ -77,7 +77,7 @@ class GameServer:
             self.redraw()
             self.state = State.Playing
         else:
-            pl.connection.updatePlayerHand(pl.hand)
+            pl.connection.updateZone(pl.hand)
             pl.connection.endRedraw()
 
     def revealFacedown(self, addr, card, target=None):
@@ -176,8 +176,8 @@ class GameServer:
 
             c.setActive(int(pl.active))
 
-            if pl.faceups.dirty:
-                c.updatePlayerFaceups(pl.faceups)
+            for z in pl.zones:
+                c.updateZone(z)
 
             for i, card in enumerate(pl.faceups):
                 if hasattr(card, 'counter'):
@@ -185,36 +185,21 @@ class GameServer:
 
             c.updateHasAttacked(*(c.hasAttacked for c in pl.faceups))
 
-            if enemy_player.faceups.dirty:
-                c.updateEnemyFaceups(enemy_player.faceups)
+            for z in pl.opponent.zones:
+                pl.updateZone(z)
 
             for i, card in enumerate(pl.opponent.faceups):
                 if hasattr(card, 'counter'):
                     c.updateEnemyCounter(i, card.counter)
-
-            if pl.hand.dirty:
-                c.updatePlayerHand(pl.hand)
-            if pl.facedowns.dirty:
-                c.updatePlayerFacedowns(pl.facedowns)
 
             c.updatePlayerFacedownStaleness(*(c.stale for c in pl.facedowns))
 
             c.updatePlayerManaCap(pl.manaCap)
             c.updatePlayerMana(pl.mana)
 
-            if enemy_player.hand.dirty:
-                c.updateEnemyHand(enemy_player.hand)
-            if enemy_player.facedowns.dirty:
-                c.updateEnemyFacedowns(enemy_player.facedowns)
-
             c.updateEnemyFacedownStaleness(*(c.stale for c in pl.opponent.facedowns))
 
             c.updateEnemyManaCap(enemy_player.manaCap)
-
-            if pl.graveyard.dirty:
-                c.updatePlayerGraveyard(pl.graveyard)
-            if enemy_player.graveyard.dirty:
-                c.updateEnemyGraveyard(pl.opponent.graveyard)
 
             c.endRedraw()
 
