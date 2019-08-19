@@ -186,7 +186,7 @@ class GameServer:
             c.updateHasAttacked(*(c.hasAttacked for c in pl.faceups))
 
             for z in pl.opponent.zones:
-                pl.updateZone(z)
+                c.updateZone(z)
 
             for i, card in enumerate(pl.opponent.faceups):
                 if hasattr(card, 'counter'):
