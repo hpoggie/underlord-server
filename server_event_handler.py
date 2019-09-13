@@ -50,3 +50,13 @@ class ServerEventHandler(EventHandler):
     def on_end_turn(self, game):
         for c in self.connections:
             c.playAnimation('on_end_turn')
+
+    def on_move_card(self, card, old, new):
+        if new != card.controller.deck:
+            card.controller.opponent.connection.updateCardVisibility(card)
+
+        if new not in (card.controller.hand, card.controller.deck, card.controller.facedowns):
+            card.controller.opponent.connection.updateCardVisibility(card)
+
+        for c in self.connections:
+            c.moveCard(card, new)
