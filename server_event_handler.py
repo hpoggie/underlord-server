@@ -53,7 +53,7 @@ class ServerEventHandler(EventHandler):
 
     def on_move_card(self, card, old, new):
         if new != card.controller.deck:
-            card.controller.opponent.connection.updateCardVisibility(card)
+            card.controller.connection.updateCardVisibility(card)
 
         if new not in (card.controller.hand, card.controller.deck, card.controller.facedowns):
             card.controller.opponent.connection.updateCardVisibility(card)
