@@ -76,6 +76,8 @@ class GameServer:
                 c.updateBothPlayersMulliganed()
             self.redraw()
             self.state = State.Playing
+        else:
+            pl.connection.endRedraw()
 
     def revealFacedown(self, addr, card, target=None):
         pl = self.players[addr]
