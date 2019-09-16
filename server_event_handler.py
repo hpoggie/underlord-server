@@ -29,8 +29,6 @@ class ServerEventHandler(EventHandler):
 
     def on_reveal_facedown(self, card, targets):
         for c in self.connections:
-            c.updateZone(card.controller.faceups)
-
             pl = c.player
             c.playAnimation('on_reveal_facedown', card, *targets, player=pl)
 
