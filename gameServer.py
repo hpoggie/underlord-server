@@ -76,9 +76,6 @@ class GameServer:
                 c.updateBothPlayersMulliganed()
             self.redraw()
             self.state = State.Playing
-        else:
-            pl.connection.updateZone(pl.hand)
-            pl.connection.endRedraw()
 
     def revealFacedown(self, addr, card, target=None):
         pl = self.players[addr]
@@ -176,19 +173,11 @@ class GameServer:
 
             c.setActive(int(pl.active))
 
-            for z in pl.zones:
-                if z is not pl.face:
-                    c.updateZone(z)
-
             for i, card in enumerate(pl.faceups):
                 if hasattr(card, 'counter'):
                     c.updatePlayerCounter(i, card.counter)
 
             c.updateHasAttacked(*(c.hasAttacked for c in pl.faceups))
-
-            for z in pl.opponent.zones:
-                if z is not pl.opponent.face:
-                    c.updateZone(z)
 
             for i, card in enumerate(pl.opponent.faceups):
                 if hasattr(card, 'counter'):
