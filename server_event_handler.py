@@ -50,11 +50,15 @@ class ServerEventHandler(EventHandler):
             c.playAnimation('on_end_turn')
 
     def on_move_card(self, card, old, new):
-        if new != card.controller.deck:
-            card.controller.connection.updateCardVisibility(card)
-
-        if new not in (card.controller.hand, card.controller.deck, card.controller.facedowns):
-            card.controller.opponent.connection.updateCardVisibility(card)
+        def is_visible_to(card, pl):
+            return card not in (pl.deck,
+                                pl.opponent.deck,
+                                pl.opponent.hand,
+                                pl.opponent.facedowns)
 
         for c in self.connections:
-            c.moveCard(card, new)
+            if is_visible_to(card, c.player):
+                c.updateCardVisibility(card)
+                c.moveCard(card, new)
+            else:
+                c.moveCard(None, new)
