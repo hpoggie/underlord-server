@@ -62,3 +62,7 @@ class ServerEventHandler(EventHandler):
                 c.moveCard(card, new)
             else:
                 c.moveCard(None, new)
+
+    def on_change_counter(self, card, new_value):
+        for c in self.connections:
+            c.updateCounter(card, new_value)

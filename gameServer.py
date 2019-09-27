@@ -175,15 +175,7 @@ class GameServer:
 
             c.setActive(int(pl.active))
 
-            for i, card in enumerate(pl.faceups):
-                if hasattr(card, 'counter'):
-                    c.updatePlayerCounter(i, card.counter)
-
             c.updateHasAttacked(*(c.hasAttacked for c in pl.faceups))
-
-            for i, card in enumerate(pl.opponent.faceups):
-                if hasattr(card, 'counter'):
-                    c.updateEnemyCounter(i, card.counter)
 
             c.updatePlayerFacedownStaleness(*(c.stale for c in pl.facedowns))
 
