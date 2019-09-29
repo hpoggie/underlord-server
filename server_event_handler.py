@@ -73,3 +73,12 @@ class ServerEventHandler(EventHandler):
                 c.updatePlayerManaCap(new_value)
             else:
                 c.updateEnemyManaCap(new_value)
+
+    def on_any(self, game):
+        super().on_any(game)
+
+        if game.requiredDecision is not None:
+            effect_owner = game.requiredDecision.owner
+            c = effect_owner.connection
+            c.requestDecision(
+                game.requiredDecision.func.__code__.co_argcount)

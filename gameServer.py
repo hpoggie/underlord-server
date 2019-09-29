@@ -185,12 +185,6 @@ class GameServer:
 
             c.endRedraw()
 
-        if self.game.requiredDecision is not None:
-            effect_owner = self.game.requiredDecision.owner
-            c = effect_owner.connection
-            c.requestDecision(
-                self.game.requiredDecision.func.__code__.co_argcount)
-
     def end_game(self, winner):
         for pl in self.game.players:
             if pl == winner:
