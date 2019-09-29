@@ -191,10 +191,6 @@ class GameServer:
             c.requestDecision(
                 self.game.requiredDecision.func.__code__.co_argcount)
 
-        for pl in self.game.players:
-            for z in pl.zones:
-                z.dirty = False
-
     def end_game(self, winner):
         for pl in self.game.players:
             if pl == winner:
