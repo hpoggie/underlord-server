@@ -66,3 +66,10 @@ class ServerEventHandler(EventHandler):
     def on_change_counter(self, card, new_value):
         for c in self.connections:
             c.updateCounter(card, new_value)
+
+    def on_change_mana_cap(self, player, new_value):
+        for c in self.connections:
+            if c.player is player:
+                c.updatePlayerManaCap(new_value)
+            else:
+                c.updateEnemyManaCap(new_value)

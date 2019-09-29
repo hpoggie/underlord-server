@@ -179,12 +179,9 @@ class GameServer:
 
             c.updatePlayerFacedownStaleness(*(c.stale for c in pl.facedowns))
 
-            c.updatePlayerManaCap(pl.manaCap)
             c.updatePlayerMana(pl.mana)
 
             c.updateEnemyFacedownStaleness(*(c.stale for c in pl.opponent.facedowns))
-
-            c.updateEnemyManaCap(enemy_player.manaCap)
 
             c.endRedraw()
 
