@@ -179,8 +179,6 @@ class GameServer:
 
             c.updatePlayerFacedownStaleness(*(c.stale for c in pl.facedowns))
 
-            c.updatePlayerMana(pl.mana)
-
             c.updateEnemyFacedownStaleness(*(c.stale for c in pl.opponent.facedowns))
 
             c.endRedraw()

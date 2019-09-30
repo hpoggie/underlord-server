@@ -74,6 +74,11 @@ class ServerEventHandler(EventHandler):
             else:
                 c.updateEnemyManaCap(new_value)
 
+    def on_change_mana(self, player, new_value):
+        for c in self.connections:
+            if c.player is player:
+                c.updatePlayerMana(new_value)
+
     def on_any(self, game):
         super().on_any(game)
 
