@@ -14,6 +14,7 @@ class ServerEventHandler(EventHandler):
         for conn in self.connections:
             pl = conn.player
             conn.playAnimation('on_fight', c1, c2)
+            conn.updateHasAttacked(c1)
 
     def on_die(self, card):
         for c in self.connections:

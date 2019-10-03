@@ -175,8 +175,6 @@ class GameServer:
 
             c.setActive(int(pl.active))
 
-            c.updateHasAttacked(*(c.hasAttacked for c in pl.faceups))
-
             c.updatePlayerFacedownStaleness(*(c.stale for c in pl.facedowns))
 
             c.updateEnemyFacedownStaleness(*(c.stale for c in pl.opponent.facedowns))
