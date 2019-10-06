@@ -75,38 +75,29 @@ class GameServer:
             for c in self.network_manager.connections:
                 c.updateBothPlayersMulliganed()
                 c.setActive(c.player.active)
-            self.redraw()
             self.state = State.Playing
-        else:
-            pl.connection.endRedraw()
 
     def revealFacedown(self, addr, card, target=None):
         pl = self.players[addr]
         pl.revealFacedown(card, target)
-        self.redraw()
 
     def playFaceup(self, addr, card, target=None):
         pl = self.players[addr]
         pl.playFaceup(card, target)
-        self.redraw()
 
     def attack(self, addr, attacker, target):
         pl = self.players[addr]
         pl.attack(attacker, target)
-        self.redraw()
 
     def play(self, addr, card):
         pl = self.players[addr]
         pl.play(card)
-        self.redraw()
 
     def useFactionAbility(self, addr, *args):
         try:
             self.players[addr].factionAbility(*args)
         except TypeError:  # Ignore if args are bad
             pass
-
-        self.redraw()
 
     def endTurn(self, addr, target=None):
         pl = self.players[addr]
@@ -121,12 +112,9 @@ class GameServer:
             c.updatePlayerFacedownStaleness(*(c.stale for c in pl.facedowns))
             c.updateEnemyFacedownStaleness(*(c.stale for c in pl.opponent.facedowns))
 
-        self.redraw()
-
     def makeDecision(self, addr, *cards):
         pl = self.players[addr]
         pl.makeRequiredDecision(*cards)
-        self.redraw()
 
     def useThiefAbility(self, addr, discard_index, cardname, target_index):
         pl = self.players[addr]
@@ -134,7 +122,6 @@ class GameServer:
             pl.hand[discard_index],
             cardname,
             pl.opponent.facedowns[target_index])
-        self.redraw()
 
     #
     # End of network functions
@@ -174,12 +161,6 @@ class GameServer:
             ndp.enemyGoingSecond()
 
         self.game.start()
-        self.redraw()
-
-    def redraw(self):
-        for pl in self.game.players:
-            c = pl.connection
-            c.endRedraw()
 
     def end_game(self, winner):
         for pl in self.game.players:
@@ -202,7 +183,6 @@ class GameServer:
                 print(e)
                 for conn in self.network_manager.connections:
                     conn.illegalMove()
-                self.redraw()
             except EndOfGame as e:
                 self.end_game(e.winner)
                 exit(0)
