@@ -74,6 +74,7 @@ class GameServer:
         if pl.opponent.hasMulliganed:
             for c in self.network_manager.connections:
                 c.updateBothPlayersMulliganed()
+                c.setActive(c.player.active)
             self.redraw()
             self.state = State.Playing
         else:
@@ -113,6 +114,13 @@ class GameServer:
             pl.endTurn(target)
         else:
             pl.endTurn()
+
+        for c in self.network_manager.connections:
+            pl = c.player
+            c.setActive(int(pl.active))
+            c.updatePlayerFacedownStaleness(*(c.stale for c in pl.facedowns))
+            c.updateEnemyFacedownStaleness(*(c.stale for c in pl.opponent.facedowns))
+
         self.redraw()
 
     def makeDecision(self, addr, *cards):
@@ -171,14 +179,6 @@ class GameServer:
     def redraw(self):
         for pl in self.game.players:
             c = pl.connection
-            enemy_player = pl.opponent
-
-            c.setActive(int(pl.active))
-
-            c.updatePlayerFacedownStaleness(*(c.stale for c in pl.facedowns))
-
-            c.updateEnemyFacedownStaleness(*(c.stale for c in pl.opponent.facedowns))
-
             c.endRedraw()
 
     def end_game(self, winner):
