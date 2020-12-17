@@ -104,7 +104,7 @@ class GameServer:
         try:
             self.players[addr].factionAbility(*args)
         except TypeError:  # Ignore if args are bad
-            pass
+            print(args)
 
         self.redraw()
 
